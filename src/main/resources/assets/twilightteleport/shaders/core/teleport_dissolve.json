@@ -1,0 +1,251 @@
+{
+  "vertex": "twilightteleport:teleport_dissolve",
+  "fragment": "twilightteleport:teleport_dissolve",
+  "attributes": [
+    "Position",
+    "Color",
+    "UV0",
+    "UV1",
+    "UV2",
+    "Normal"
+  ],
+  "samplers": [
+    {
+      "name": "Sampler0"
+    },
+    {
+      "name": "Sampler1"
+    },
+    {
+      "name": "Sampler2"
+    }
+  ],
+  "uniforms": [
+    {
+      "name": "ModelViewMat",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "ProjMat",
+      "type": "matrix4x4",
+      "count": 16,
+      "values": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "name": "ColorModulator",
+      "type": "float",
+      "count": 4,
+      "values": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "name": "Light0_Direction",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.2,
+        1.0,
+        -0.7
+      ]
+    },
+    {
+      "name": "Light1_Direction",
+      "type": "float",
+      "count": 3,
+      "values": [
+        -0.2,
+        1.0,
+        0.7
+      ]
+    },
+    {
+      "name": "FogStart",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "FogEnd",
+      "type": "float",
+      "count": 1,
+      "values": [
+        1.0
+      ]
+    },
+    {
+      "name": "FogColor",
+      "type": "float",
+      "count": 4,
+      "values": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FogShape",
+      "type": "int",
+      "count": 1,
+      "values": [
+        0
+      ]
+    },
+    {
+      "name": "DissolveProgress",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "EntityOrigin",
+      "type": "float",
+      "count": 3,
+      "values": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "EntityHeight",
+      "type": "float",
+      "count": 1,
+      "values": [
+        1.8
+      ]
+    },
+    {
+      "name": "EffectTime",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "NoiseScale",
+      "type": "float",
+      "count": 1,
+      "values": [
+        4.5
+      ]
+    },
+    {
+      "name": "NoiseStrength",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.18
+      ]
+    },
+    {
+      "name": "EdgeWidth",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.075
+      ]
+    },
+    {
+      "name": "BlackCoreWidth",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.045
+      ]
+    },
+    {
+      "name": "Rebuilding",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    },
+    {
+      "name": "RebuildBlockNoiseScale",
+      "type": "float",
+      "count": 1,
+      "values": [
+        8.0
+      ]
+    },
+    {
+      "name": "RebuildBlockBandWidth",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.145
+      ]
+    },
+    {
+      "name": "RebuildBlockStrength",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.115
+      ]
+    },
+    {
+      "name": "RebuildBlockSpeed",
+      "type": "float",
+      "count": 1,
+      "values": [
+        7.0
+      ]
+    },
+    {
+      "name": "RebuildMeshStarted",
+      "type": "float",
+      "count": 1,
+      "values": [
+        0.0
+      ]
+    }
+  ]
+}

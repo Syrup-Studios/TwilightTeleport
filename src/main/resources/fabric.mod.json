@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "twilightteleport",
+  "version": "${version}",
+  "name": "TwilightTeleport",
+  "description": "Adds a cinematic teleport effect with configurable visual options.",
+  "authors": [
+    "Ochibo"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/twilightteleport/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.ochibo.twilightteleport.client.TwilightTeleportClient"
+    ],
+    "main": [
+      "net.ochibo.twilightteleport.TwilightTeleport"
+    ],
+    "modmenu": [
+      "net.ochibo.twilightteleport.client.integration.TwilightTeleportModMenuApi"
+    ]
+  },
+  "mixins": [
+    "twilightteleport.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}
