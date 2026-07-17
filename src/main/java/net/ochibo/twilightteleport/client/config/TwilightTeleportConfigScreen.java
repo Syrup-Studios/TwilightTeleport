@@ -1,10 +1,10 @@
 package net.ochibo.twilightteleport.client.config;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfig;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 
@@ -17,7 +17,7 @@ public final class TwilightTeleportConfigScreen extends Screen {
     private TwilightTeleportConfig working;
 
     public TwilightTeleportConfigScreen(Screen parent) {
-        super(Text.translatable("config.twilightteleport.title"));
+        super(Component.translatable("config.twilightteleport.title"));
         this.parent = parent;
         this.working = TwilightTeleportConfigManager.copy();
     }
@@ -29,19 +29,19 @@ public final class TwilightTeleportConfigScreen extends Screen {
         int x = width / 2 - widgetWidth / 2;
         int startY = 44;
 
-        addDrawableChild(createParticleButton(
+        addRenderableWidget(createParticleButton(
                 x,
                 startY,
                 widgetWidth
         ));
 
-        addDrawableChild(createShaderPackQualityButton(
+        addRenderableWidget(createShaderPackQualityButton(
                 x,
                 startY + ROW_HEIGHT,
                 widgetWidth
         ));
 
-        addDrawableChild(createToggleButton(
+        addRenderableWidget(createToggleButton(
                 x,
                 startY + ROW_HEIGHT * 2,
                 widgetWidth,
@@ -50,7 +50,7 @@ public final class TwilightTeleportConfigScreen extends Screen {
                 working::setSoundEnabled
         ));
 
-        addDrawableChild(createToggleButton(
+        addRenderableWidget(createToggleButton(
                 x,
                 startY + ROW_HEIGHT * 3,
                 widgetWidth,
@@ -59,7 +59,7 @@ public final class TwilightTeleportConfigScreen extends Screen {
                 working::setLetterboxEnabled
         ));
 
-        addDrawableChild(createToggleButton(
+        addRenderableWidget(createToggleButton(
                 x,
                 startY + ROW_HEIGHT * 4,
                 widgetWidth,
@@ -76,17 +76,17 @@ public final class TwilightTeleportConfigScreen extends Screen {
         int totalWidth = buttonWidth * 3 + gap * 2;
         int firstX = width / 2 - totalWidth / 2;
 
-        addDrawableChild(
-                ButtonWidget.builder(
-                                Text.translatable(
+        addRenderableWidget(
+                Button.builder(
+                                Component.translatable(
                                         "config.twilightteleport.reset"
                                 ),
                                 button -> {
                                     working = TwilightTeleportConfig.defaults();
-                                    clearAndInit();
+                                    rebuildWidgets();
                                 }
                         )
-                        .dimensions(
+                        .bounds(
                                 firstX,
                                 bottomY,
                                 buttonWidth,
@@ -95,12 +95,12 @@ public final class TwilightTeleportConfigScreen extends Screen {
                         .build()
         );
 
-        addDrawableChild(
-                ButtonWidget.builder(
-                                Text.translatable("gui.cancel"),
-                                button -> close()
+        addRenderableWidget(
+                Button.builder(
+                                Component.translatable("gui.cancel"),
+                                button -> onClose()
                         )
-                        .dimensions(
+                        .bounds(
                                 firstX + buttonWidth + gap,
                                 bottomY,
                                 buttonWidth,
@@ -109,12 +109,12 @@ public final class TwilightTeleportConfigScreen extends Screen {
                         .build()
         );
 
-        addDrawableChild(
-                ButtonWidget.builder(
-                                Text.translatable("gui.done"),
+        addRenderableWidget(
+                Button.builder(
+                                Component.translatable("gui.done"),
                                 button -> saveAndClose()
                         )
-                        .dimensions(
+                        .bounds(
                                 firstX + (buttonWidth + gap) * 2,
                                 bottomY,
                                 buttonWidth,
@@ -124,12 +124,12 @@ public final class TwilightTeleportConfigScreen extends Screen {
         );
     }
 
-    private ButtonWidget createParticleButton(
+    private Button createParticleButton(
             int x,
             int y,
             int width
     ) {
-        return ButtonWidget.builder(
+        return Button.builder(
                         particleButtonText(),
                         button -> {
                             working.setParticleAmount(
@@ -138,24 +138,24 @@ public final class TwilightTeleportConfigScreen extends Screen {
                             button.setMessage(particleButtonText());
                         }
                 )
-                .dimensions(x, y, width, WIDGET_HEIGHT)
+                .bounds(x, y, width, WIDGET_HEIGHT)
                 .build();
     }
 
-    private Text particleButtonText() {
-        return Text.translatable(
+    private Component particleButtonText() {
+        return Component.translatable(
                 "config.twilightteleport.particle_amount"
         ).append(": ").append(
                 working.getParticleAmount().displayText()
         );
     }
 
-    private ButtonWidget createShaderPackQualityButton(
+    private Button createShaderPackQualityButton(
             int x,
             int y,
             int width
     ) {
-        return ButtonWidget.builder(
+        return Button.builder(
                         shaderPackQualityButtonText(),
                         button -> {
                             working.setShaderPackEffectQuality(
@@ -168,12 +168,12 @@ public final class TwilightTeleportConfigScreen extends Screen {
                             );
                         }
                 )
-                .dimensions(x, y, width, WIDGET_HEIGHT)
+                .bounds(x, y, width, WIDGET_HEIGHT)
                 .build();
     }
 
-    private Text shaderPackQualityButtonText() {
-        return Text.translatable(
+    private Component shaderPackQualityButtonText() {
+        return Component.translatable(
                 "config.twilightteleport.shader_pack_quality"
         ).append(": ").append(
                 working
@@ -182,7 +182,7 @@ public final class TwilightTeleportConfigScreen extends Screen {
         );
     }
 
-    private ButtonWidget createToggleButton(
+    private Button createToggleButton(
             int x,
             int y,
             int width,
@@ -192,7 +192,7 @@ public final class TwilightTeleportConfigScreen extends Screen {
     ) {
         final boolean[] value = {initialValue};
 
-        return ButtonWidget.builder(
+        return Button.builder(
                         toggleText(translationKey, value[0]),
                         button -> {
                             value[0] = !value[0];
@@ -205,17 +205,17 @@ public final class TwilightTeleportConfigScreen extends Screen {
                             );
                         }
                 )
-                .dimensions(x, y, width, WIDGET_HEIGHT)
+                .bounds(x, y, width, WIDGET_HEIGHT)
                 .build();
     }
 
-    private static Text toggleText(
+    private static Component toggleText(
             String translationKey,
             boolean enabled
     ) {
-        return Text.translatable(translationKey)
+        return Component.translatable(translationKey)
                 .append(": ")
-                .append(Text.translatable(
+                .append(Component.translatable(
                         enabled
                                 ? "options.on"
                                 : "options.off"
@@ -225,41 +225,45 @@ public final class TwilightTeleportConfigScreen extends Screen {
     private void saveAndClose() {
         TwilightTeleportConfigManager.set(working);
         TwilightTeleportConfigManager.save();
-        close();
+        onClose();
     }
 
     @Override
-    public void close() {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public void onClose() {
+        Minecraft client = Minecraft.getInstance();
         client.setScreen(parent);
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
     @Override
     public void render(
-            DrawContext context,
+            GuiGraphics context,
             int mouseX,
             int mouseY,
             float delta
     ) {
+        //? if >=1.20.5 {
         renderBackground(context, mouseX, mouseY, delta);
+        //?} else {
+        /*renderBackground(context);
+        *///?}
         super.render(context, mouseX, mouseY, delta);
 
-        context.drawCenteredTextWithShadow(
-                textRenderer,
+        context.drawCenteredString(
+                font,
                 title,
                 width / 2,
                 16,
                 0xFFFFFF
         );
 
-        context.drawTextWithShadow(
-                textRenderer,
-                Text.translatable(
+        context.drawString(
+                font,
+                Component.translatable(
                         "config.twilightteleport.visual_section"
                 ),
                 Math.max(8, width / 2 - 160),

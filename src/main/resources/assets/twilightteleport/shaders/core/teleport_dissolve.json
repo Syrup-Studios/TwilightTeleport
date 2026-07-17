@@ -68,6 +68,22 @@
       ]
     },
     {
+      "name": "PositionTransform",
+      "type": "matrix3x3",
+      "count": 9,
+      "values": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
       "name": "ColorModulator",
       "type": "float",
       "count": 4,

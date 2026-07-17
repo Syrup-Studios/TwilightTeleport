@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import net.ochibo.twilightteleport.config.ParticleAmount;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 
@@ -63,7 +63,7 @@ public final class TwilightTeleportClientCommand {
         TwilightTeleportConfigManager.save();
 
         source.sendFeedback(
-                Text.translatable(
+                Component.translatable(
                         "command.twilightteleport.particle_set",
                         amount.displayText()
                 )
@@ -78,7 +78,7 @@ public final class TwilightTeleportClientCommand {
         TwilightTeleportConfigManager.reset();
 
         source.sendFeedback(
-                Text.translatable(
+                Component.translatable(
                         "command.twilightteleport.reset"
                 )
         );

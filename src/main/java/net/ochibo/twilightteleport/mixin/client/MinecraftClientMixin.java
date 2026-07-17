@@ -1,8 +1,8 @@
 package net.ochibo.twilightteleport.mixin.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DownloadingTerrainScreen;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ReceivingLevelScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(MinecraftClient.class)
+@Mixin(Minecraft.class)
 public abstract class MinecraftClientMixin {
 
     
@@ -23,7 +23,7 @@ public abstract class MinecraftClientMixin {
             Screen screen,
             CallbackInfo ci
     ) {
-        if (screen instanceof DownloadingTerrainScreen
+        if (screen instanceof ReceivingLevelScreen
                 && TeleportCameraController.isWaitingForTeleport()) {
             ci.cancel();
         }
@@ -31,7 +31,7 @@ public abstract class MinecraftClientMixin {
 
     
     @Inject(
-            method = "handleInputEvents",
+            method = "handleKeybinds",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -45,7 +45,7 @@ public abstract class MinecraftClientMixin {
 
     
     @Inject(
-            method = "handleBlockBreaking",
+            method = "continueAttack",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -59,7 +59,7 @@ public abstract class MinecraftClientMixin {
     }
 
     @Inject(
-            method = "doAttack",
+            method = "startAttack",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -72,7 +72,7 @@ public abstract class MinecraftClientMixin {
     }
 
     @Inject(
-            method = "doItemUse",
+            method = "startUseItem",
             at = @At("HEAD"),
             cancellable = true
     )

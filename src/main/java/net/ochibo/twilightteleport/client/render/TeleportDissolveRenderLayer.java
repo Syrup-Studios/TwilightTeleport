@@ -1,29 +1,29 @@
 package net.ochibo.twilightteleport.client.render;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.util.Identifier;
-
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+import net.ochibo.twilightteleport.mixin.client.RenderTypeAccessor;
 
 
 public final class TeleportDissolveRenderLayer
-        extends RenderLayer {
+        extends RenderType {
 
-    private static final Map<SkinLayerKey, RenderLayer> SKIN_CACHE =
+    private static final Map<SkinLayerKey, RenderType> SKIN_CACHE =
             new ConcurrentHashMap<>();
 
-    private static final Map<WrappedLayerKey, RenderLayer> WRAPPED_CACHE =
+    private static final Map<WrappedLayerKey, RenderType> WRAPPED_CACHE =
             new ConcurrentHashMap<>();
 
     private TeleportDissolveRenderLayer(
             String name,
             VertexFormat vertexFormat,
-            VertexFormat.DrawMode drawMode,
+            VertexFormat.Mode drawMode,
             int expectedBufferSize,
             boolean hasCrumbling,
             boolean translucent,
@@ -42,9 +42,9 @@ public final class TeleportDissolveRenderLayer
     }
 
     
-    public static RenderLayer get(
+    public static RenderType get(
             UUID playerUuid,
-            Identifier texture
+            ResourceLocation texture
     ) {
         SkinLayerKey key =
                 new SkinLayerKey(playerUuid, texture);
@@ -56,9 +56,9 @@ public final class TeleportDissolveRenderLayer
     }
 
     
-    public static RenderLayer wrap(
+    public static RenderType wrap(
             UUID playerUuid,
-            RenderLayer originalLayer
+            RenderType originalLayer
     ) {
         if (originalLayer instanceof TeleportDissolveRenderLayer) {
             return originalLayer;
@@ -86,7 +86,7 @@ public final class TeleportDissolveRenderLayer
         );
     }
 
-    private static RenderLayer createSkinLayer(
+    private static RenderType createSkinLayer(
             SkinLayerKey key
     ) {
         LayerActions actions =
@@ -97,19 +97,19 @@ public final class TeleportDissolveRenderLayer
                         + key.playerUuid()
                         + "_"
                         + key.texture(),
-                VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
-                VertexFormat.DrawMode.QUADS,
-                DEFAULT_BUFFER_SIZE,
+                DefaultVertexFormat.NEW_ENTITY,
+                VertexFormat.Mode.QUADS,
+                TRANSIENT_BUFFER_SIZE,
                 false,
                 false,
                 actions
         );
     }
 
-    private static RenderLayer createWrappedLayer(
+    private static RenderType createWrappedLayer(
             WrappedLayerKey key
     ) {
-        RenderLayer original = key.originalLayer();
+        RenderType original = key.originalLayer();
 
         LayerActions actions =
                 createWrappedActions(key);
@@ -121,11 +121,16 @@ public final class TeleportDissolveRenderLayer
                         + Integer.toHexString(
                         System.identityHashCode(original)
                 ),
-                original.getVertexFormat(),
-                original.getDrawMode(),
-                original.getExpectedBufferSize(),
-                original.hasCrumbling(),
-                original.isTranslucent(),
+                original.format(),
+                original.mode(),
+                original.bufferSize(),
+                original.affectsCrumbling(),
+                //? if >=1.20.5 {
+                original.sortOnUpload(),
+                //?} else {
+                /*((RenderTypeAccessor) (Object) original)
+                        .twilightTeleport$sortOnUpload(),
+                *///?}
                 actions
         );
     }
@@ -133,41 +138,41 @@ public final class TeleportDissolveRenderLayer
     private static LayerActions createSkinActions(
             SkinLayerKey key
     ) {
-        Texture texturePhase =
-                new Texture(key.texture(), false, false);
+        TextureStateShard texturePhase =
+                new TextureStateShard(key.texture(), false, false);
 
-        ShaderProgram shaderPhase =
-                new ShaderProgram(
+        ShaderStateShard shaderPhase =
+                new ShaderStateShard(
                         TeleportDissolveShaders::getProgram
                 );
 
-        Texturing uniformPhase =
+        TexturingStateShard uniformPhase =
                 createUniformPhase(key.playerUuid());
 
-        RenderPhase[] phases = {
+        RenderStateShard[] phases = {
                 texturePhase,
                 shaderPhase,
                 NO_TRANSPARENCY,
                 LEQUAL_DEPTH_TEST,
-                DISABLE_CULLING,
-                ENABLE_LIGHTMAP,
-                ENABLE_OVERLAY_COLOR,
+                NO_CULL,
+                LIGHTMAP,
+                OVERLAY,
                 NO_LAYERING,
                 MAIN_TARGET,
                 uniformPhase,
-                ALL_MASK,
+                COLOR_DEPTH_WRITE,
                 NO_COLOR_LOGIC
         };
 
         Runnable startAction = () -> {
-            for (RenderPhase phase : phases) {
-                phase.startDrawing();
+            for (RenderStateShard phase : phases) {
+                phase.setupRenderState();
             }
         };
 
         Runnable endAction = () -> {
             for (int i = phases.length - 1; i >= 0; i--) {
-                phases[i].endDrawing();
+                phases[i].clearRenderState();
             }
         };
 
@@ -180,29 +185,29 @@ public final class TeleportDissolveRenderLayer
     private static LayerActions createWrappedActions(
             WrappedLayerKey key
     ) {
-        RenderLayer original = key.originalLayer();
+        RenderType original = key.originalLayer();
 
-        ShaderProgram shaderPhase =
-                new ShaderProgram(
+        ShaderStateShard shaderPhase =
+                new ShaderStateShard(
                         TeleportDissolveShaders::getProgram
                 );
 
-        Texturing uniformPhase =
+        TexturingStateShard uniformPhase =
                 createUniformPhase(key.playerUuid());
 
         Runnable startAction = () -> {
             
-            original.startDrawing();
+            original.setupRenderState();
 
             
-            shaderPhase.startDrawing();
-            uniformPhase.startDrawing();
+            shaderPhase.setupRenderState();
+            uniformPhase.setupRenderState();
         };
 
         Runnable endAction = () -> {
-            uniformPhase.endDrawing();
-            shaderPhase.endDrawing();
-            original.endDrawing();
+            uniformPhase.clearRenderState();
+            shaderPhase.clearRenderState();
+            original.clearRenderState();
         };
 
         return new LayerActions(
@@ -211,10 +216,10 @@ public final class TeleportDissolveRenderLayer
         );
     }
 
-    private static Texturing createUniformPhase(
+    private static TexturingStateShard createUniformPhase(
             UUID playerUuid
     ) {
-        return new Texturing(
+        return new TexturingStateShard(
                 "twilightteleport_dissolve_uniforms_"
                         + playerUuid,
                 () -> TeleportDissolveRenderState
@@ -226,14 +231,14 @@ public final class TeleportDissolveRenderLayer
 
     private record SkinLayerKey(
             UUID playerUuid,
-            Identifier texture
+            ResourceLocation texture
     ) {
     }
 
     
     private record WrappedLayerKey(
             UUID playerUuid,
-            RenderLayer originalLayer
+            RenderType originalLayer
     ) {
     }
 

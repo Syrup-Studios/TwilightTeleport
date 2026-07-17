@@ -1,7 +1,7 @@
 package net.ochibo.twilightteleport.mixin.client;
 
-import net.minecraft.client.input.Input;
-import net.minecraft.client.input.KeyboardInput;
+import net.minecraft.client.player.Input;
+import net.minecraft.client.player.KeyboardInput;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,15 +26,15 @@ public abstract class KeyboardInputMixin {
 
         Input input = (Input) (Object) this;
 
-        input.movementForward = 0.0F;
-        input.movementSideways = 0.0F;
+        input.forwardImpulse = 0.0F;
+        input.leftImpulse = 0.0F;
 
-        input.pressingForward = false;
-        input.pressingBack = false;
-        input.pressingLeft = false;
-        input.pressingRight = false;
+        input.up = false;
+        input.down = false;
+        input.left = false;
+        input.right = false;
 
         input.jumping = false;
-        input.sneaking = false;
+        input.shiftKeyDown = false;
     }
 }

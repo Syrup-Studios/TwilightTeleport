@@ -1,10 +1,11 @@
 package net.ochibo.twilightteleport.client.particle;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
 import net.ochibo.twilightteleport.ModParticles;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 import net.ochibo.twilightteleport.client.effect.TeleportEntityEffectManager;
@@ -25,8 +26,8 @@ public final class TeleportShardSpawner {
     private TeleportShardSpawner() {
     }
 
-    public static void tick(MinecraftClient client) {
-        ClientWorld world = client.world;
+    public static void tick(Minecraft client) {
+        ClientLevel world = client.level;
 
         if (world == null) {
             return;
@@ -42,19 +43,19 @@ public final class TeleportShardSpawner {
             return;
         }
 
-        for (AbstractClientPlayerEntity player
-                : world.getPlayers()) {
+        for (AbstractClientPlayer player
+                : world.players()) {
 
             boolean dissolving =
                     TeleportEntityEffectManager
                             .isDissolving(
-                                    player.getUuid()
+                                    player.getUUID()
                             );
 
             boolean rebuilding =
                     TeleportEntityEffectManager
                             .isRebuilding(
-                                    player.getUuid()
+                                    player.getUUID()
                             );
 
             if (!dissolving && !rebuilding) {
@@ -74,7 +75,7 @@ public final class TeleportShardSpawner {
             if (rebuilding
                     && TeleportEntityEffectManager
                     .getRebuildingProgress(
-                            player.getUuid(),
+                            player.getUUID(),
                             0.0F
                     ) < PARTICLE_REBUILD_TIME) {
                 spawnRebuilding(world, player, particlesPerTick);
@@ -83,14 +84,14 @@ public final class TeleportShardSpawner {
     }
 
     private static void spawnOutgoing(
-            ClientWorld world,
-            AbstractClientPlayerEntity player,
+            ClientLevel world,
+            AbstractClientPlayer player,
             int particlesPerTick
     ) {
         float dissolve =
                 TeleportEntityEffectManager
                         .getDissolveProgress(
-                                player.getUuid(),
+                                player.getUUID(),
                                 0.0F
                         );
 
@@ -101,13 +102,13 @@ public final class TeleportShardSpawner {
         float localBoundaryY =
                 effectHeight * (1.0F - dissolve);
 
-        Random random = world.random;
+        RandomSource random = world.random;
 
         for (int i = 0;
              i < particlesPerTick;
              i++) {
 
-            Vec3d spawnPoint =
+            Vec3 spawnPoint =
                     sampleBoundaryCrossSection(
                             player,
                             localBoundaryY,
@@ -132,20 +133,20 @@ public final class TeleportShardSpawner {
     }
 
     private static void spawnRebuilding(
-            ClientWorld world,
-            AbstractClientPlayerEntity player,
+            ClientLevel world,
+            AbstractClientPlayer player,
             int particlesPerTick
     ) {
         
         float rebuildProgress =
                 TeleportEntityEffectManager
                         .getRebuildingProgress(
-                                player.getUuid(),
+                                player.getUUID(),
                                 0.0F
                         );
 
         float particleBoundaryProgress =
-                Math.clamp(
+                Mth.clamp(
                         rebuildProgress
                                 / PARTICLE_REBUILD_TIME,
                         0.0F,
@@ -159,13 +160,13 @@ public final class TeleportShardSpawner {
         float localBoundaryY =
                 effectHeight * particleBoundaryProgress;
 
-        Random random = world.random;
+        RandomSource random = world.random;
 
         for (int i = 0;
              i < particlesPerTick;
              i++) {
 
-            Vec3d targetPoint =
+            Vec3 targetPoint =
                     sampleBoundaryCrossSection(
                             player,
                             localBoundaryY,
@@ -192,12 +193,12 @@ public final class TeleportShardSpawner {
     }
 
     
-    private static Vec3d sampleBoundaryCrossSection(
-            AbstractClientPlayerEntity player,
+    private static Vec3 sampleBoundaryCrossSection(
+            AbstractClientPlayer player,
             float localBoundaryY,
-            Random random
+            RandomSource random
     ) {
-        Vec3d point =
+        Vec3 point =
                 TeleportRenderedHeightManager
                         .sampleCrossSectionPoint(
                                 player,
@@ -214,7 +215,7 @@ public final class TeleportShardSpawner {
     }
 
     private static double centered(
-            Random random,
+            RandomSource random,
             double range
     ) {
         return (

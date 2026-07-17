@@ -1,8 +1,9 @@
 package net.ochibo.twilightteleport.client.render;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.util.math.MathHelper;
+//? if >=1.20.5
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Mth;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 
@@ -14,17 +15,22 @@ public final class TeleportOverlayRenderer {
     }
 
     public static void render(
-            DrawContext context,
-            RenderTickCounter tickCounter
+            GuiGraphics context,
+            //? if >=1.20.5 {
+            DeltaTracker tickCounter
+            //?} else {
+            /*float tickDelta
+            *///?}
     ) {
-        float tickDelta = tickCounter.getTickDelta(false);
+        //? if >=1.20.5
+        float tickDelta = tickCounter.getGameTimeDeltaPartialTick(false);
 
         renderLetterbox(context, tickDelta);
         renderFade(context, tickDelta);
     }
 
     private static void renderLetterbox(
-            DrawContext context,
+            GuiGraphics context,
             float tickDelta
     ) {
         if (!TwilightTeleportConfigManager.get().isLetterboxEnabled()) {
@@ -38,8 +44,8 @@ public final class TeleportOverlayRenderer {
             return;
         }
 
-        int width = context.getScaledWindowWidth();
-        int height = context.getScaledWindowHeight();
+        int width = context.guiWidth();
+        int height = context.guiHeight();
 
         int barHeight = Math.round(
                 height * MAX_LETTERBOX_RATIO * progress
@@ -67,7 +73,7 @@ public final class TeleportOverlayRenderer {
     }
 
     private static void renderFade(
-            DrawContext context,
+            GuiGraphics context,
             float tickDelta
     ) {
         float fade =
@@ -77,7 +83,7 @@ public final class TeleportOverlayRenderer {
             return;
         }
 
-        int alpha = MathHelper.clamp(
+        int alpha = Mth.clamp(
                 Math.round(fade * 255.0F),
                 0,
                 255
@@ -88,8 +94,8 @@ public final class TeleportOverlayRenderer {
         context.fill(
                 0,
                 0,
-                context.getScaledWindowWidth(),
-                context.getScaledWindowHeight(),
+                context.guiWidth(),
+                context.guiHeight(),
                 color
         );
     }

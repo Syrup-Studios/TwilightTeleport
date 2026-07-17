@@ -57,7 +57,7 @@ final class TeleportEntityEffect {
                 (elapsedTicks + tickDelta - delayTicks)
                         / durationTicks;
 
-        return Math.clamp(progress, 0.0F, 1.0F);
+        return Math.max(0.0F, Math.min(1.0F, progress));
     }
 
     

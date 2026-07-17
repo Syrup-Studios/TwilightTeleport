@@ -1,6 +1,6 @@
 package net.ochibo.twilightteleport.config;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public enum ParticleAmount {
     NONE(0),
@@ -25,8 +25,8 @@ public enum ParticleAmount {
         };
     }
 
-    public Text displayText() {
-        return Text.translatable(
+    public Component displayText() {
+        return Component.translatable(
                 "config.twilightteleport.particle_amount." +
                         name().toLowerCase(java.util.Locale.ROOT)
         );

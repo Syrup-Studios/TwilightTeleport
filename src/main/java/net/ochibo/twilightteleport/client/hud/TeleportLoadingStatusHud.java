@@ -1,10 +1,11 @@
 package net.ochibo.twilightteleport.client.hud;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+//? if >=1.20.5
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 
@@ -25,8 +26,8 @@ public final class TeleportLoadingStatusHud {
     private static float alpha;
 
     
-    private static Text displayedText =
-            Text.empty();
+    private static Component displayedText =
+            Component.empty();
 
     private static long previousFrameNanos;
 
@@ -34,8 +35,12 @@ public final class TeleportLoadingStatusHud {
     }
 
     public static void render(
-            DrawContext drawContext,
-            RenderTickCounter tickCounter
+            GuiGraphics drawContext,
+            //? if >=1.20.5 {
+            DeltaTracker tickCounter
+            //?} else {
+            /*float tickDelta
+            *///?}
     ) {
         boolean shouldShow =
                 TwilightTeleportConfigManager
@@ -44,7 +49,7 @@ public final class TeleportLoadingStatusHud {
                         && TeleportCameraController
                         .shouldShowLoadingStatus();
 
-        Text currentText =
+        Component currentText =
                 TeleportCameraController
                         .getLoadingStatusText();
 
@@ -78,7 +83,7 @@ public final class TeleportLoadingStatusHud {
 
             if (!shouldShow) {
                 displayedText =
-                        Text.empty();
+                        Component.empty();
             }
 
             return;
@@ -92,7 +97,7 @@ public final class TeleportLoadingStatusHud {
                 smootherStep(alpha);
 
         int alphaByte =
-                MathHelper.clamp(
+                Mth.clamp(
                         Math.round(
                                 easedAlpha * 255.0F
                         ),
@@ -109,16 +114,16 @@ public final class TeleportLoadingStatusHud {
                 alphaByte << 24
                         | TEXT_RGB;
 
-        MinecraftClient client =
-                MinecraftClient.getInstance();
+        Minecraft client =
+                Minecraft.getInstance();
 
         int y =
-                drawContext.getScaledWindowHeight()
-                        - client.textRenderer.fontHeight
+                drawContext.guiHeight()
+                        - client.font.lineHeight
                         - BOTTOM_MARGIN;
 
-        drawContext.drawTextWithShadow(
-                client.textRenderer,
+        drawContext.drawString(
+                client.font,
                 displayedText,
                 LEFT_MARGIN,
                 y,
@@ -174,7 +179,7 @@ public final class TeleportLoadingStatusHud {
         previousFrameNanos =
                 currentNanos;
 
-        return MathHelper.clamp(
+        return Mth.clamp(
                 deltaSeconds,
                 0.0F,
                 0.1F
@@ -183,7 +188,7 @@ public final class TeleportLoadingStatusHud {
 
     private static float smootherStep(float value) {
         float x =
-                MathHelper.clamp(
+                Mth.clamp(
                         value,
                         0.0F,
                         1.0F
@@ -199,7 +204,7 @@ public final class TeleportLoadingStatusHud {
     public static void reset() {
         alpha = 0.0F;
         displayedText =
-                Text.empty();
+                Component.empty();
 
         previousFrameNanos = 0L;
     }

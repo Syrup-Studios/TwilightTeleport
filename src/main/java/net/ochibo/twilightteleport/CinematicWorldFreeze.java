@@ -1,7 +1,7 @@
 package net.ochibo.twilightteleport;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 
 public final class CinematicWorldFreeze {
 
@@ -13,8 +13,8 @@ public final class CinematicWorldFreeze {
     }
 
     public static void freezeIfPossible() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        IntegratedServer server = client.getServer();
+        Minecraft client = Minecraft.getInstance();
+        IntegratedServer server = client.getSingleplayerServer();
 
         
         if (server == null) {
@@ -23,17 +23,22 @@ public final class CinematicWorldFreeze {
 
         frozenServer = server;
 
-        
+        //? if >=1.20.3 {
         server.execute(() -> {
             
-            if (server.getTickManager().isFrozen()) {
+            if (server.tickRateManager().isFrozen()) {
                 ownsFreeze = false;
                 return;
             }
 
-            server.getTickManager().setFrozen(true);
+            server.tickRateManager().setFrozen(true);
             ownsFreeze = true;
         });
+        //?} else {
+        /*// Minecraft 1.20.1 has no tick-rate manager. The cinematic
+        // continues without freezing the integrated server on this target.
+        ownsFreeze = false;
+        *///?}
     }
 
     public static void unfreeze() {
@@ -46,12 +51,16 @@ public final class CinematicWorldFreeze {
             return;
         }
 
+        //? if >=1.20.3 {
         server.execute(() -> {
             if (ownsFreeze) {
-                server.getTickManager().setFrozen(false);
+                server.tickRateManager().setFrozen(false);
             }
 
             ownsFreeze = false;
         });
+        //?} else {
+        /*ownsFreeze = false;
+        *///?}
     }
 }

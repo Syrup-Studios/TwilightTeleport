@@ -1,6 +1,6 @@
 package net.ochibo.twilightteleport;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 
 public record TeleportTimingProfile(
@@ -31,32 +31,32 @@ public record TeleportTimingProfile(
     public static final int MAX_RETURN_TO_FIRST_PERSON_TICKS = 200;
 
     public TeleportTimingProfile {
-        moveToSideTicks = MathHelper.clamp(
+        moveToSideTicks = Mth.clamp(
                 moveToSideTicks,
                 MIN_MOVE_TO_SIDE_TICKS,
                 MAX_MOVE_TO_SIDE_TICKS
         );
-        dissolveTicks = MathHelper.clamp(
+        dissolveTicks = Mth.clamp(
                 dissolveTicks,
                 MIN_DISSOLVE_TICKS,
                 MAX_DISSOLVE_TICKS
         );
-        destinationHoldTicks = MathHelper.clamp(
+        destinationHoldTicks = Mth.clamp(
                 destinationHoldTicks,
                 MIN_DESTINATION_HOLD_TICKS,
                 MAX_DESTINATION_HOLD_TICKS
         );
-        rebuildMeshDelayTicks = MathHelper.clamp(
+        rebuildMeshDelayTicks = Mth.clamp(
                 rebuildMeshDelayTicks,
                 MIN_REBUILD_MESH_DELAY_TICKS,
                 MAX_REBUILD_MESH_DELAY_TICKS
         );
-        rebuildTicks = MathHelper.clamp(
+        rebuildTicks = Mth.clamp(
                 rebuildTicks,
                 MIN_REBUILD_TICKS,
                 MAX_REBUILD_TICKS
         );
-        returnToFirstPersonTicks = MathHelper.clamp(
+        returnToFirstPersonTicks = Mth.clamp(
                 returnToFirstPersonTicks,
                 MIN_RETURN_TO_FIRST_PERSON_TICKS,
                 MAX_RETURN_TO_FIRST_PERSON_TICKS

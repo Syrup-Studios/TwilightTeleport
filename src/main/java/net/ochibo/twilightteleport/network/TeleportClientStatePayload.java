@@ -1,9 +1,11 @@
 package net.ochibo.twilightteleport.network;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+//? if >=1.20.5 {
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+//?}
 import net.ochibo.twilightteleport.TwilightTeleport;
 
 import java.util.UUID;
@@ -11,33 +13,38 @@ import java.util.UUID;
 public record TeleportClientStatePayload(
         UUID sessionId,
         TeleportClientState state
-) implements CustomPayload {
+//? if >=1.20.5
+) implements CustomPacketPayload {
+//? if <1.20.5
+/*) {*/
 
-    public static final Id<TeleportClientStatePayload> ID =
-            new Id<>(Identifier.of(
-                    TwilightTeleport.MOD_ID,
-                    "teleport_client_state"
-            ));
+    //? if >=1.20.5 {
+    public static final Type<TeleportClientStatePayload> ID =
+            new Type<>(TwilightTeleport.id("teleport_client_state"));
 
-    public static final PacketCodec<RegistryByteBuf, TeleportClientStatePayload> CODEC =
-            PacketCodec.of(
+    public static final StreamCodec<RegistryFriendlyByteBuf, TeleportClientStatePayload> CODEC =
+            StreamCodec.ofMember(
                     TeleportClientStatePayload::write,
                     TeleportClientStatePayload::new
             );
+    //?} else {
+    /*public static final net.minecraft.resources.ResourceLocation ID =
+            TwilightTeleport.id("teleport_client_state");
+    *///?}
 
-    private TeleportClientStatePayload(RegistryByteBuf buf) {
+    public TeleportClientStatePayload(FriendlyByteBuf buf) {
         this(
-                buf.readUuid(),
+                buf.readUUID(),
                 readState(buf)
         );
     }
 
-    private void write(RegistryByteBuf buf) {
-        buf.writeUuid(sessionId);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeUUID(sessionId);
         buf.writeVarInt(state.ordinal());
     }
 
-    private static TeleportClientState readState(RegistryByteBuf buf) {
+    private static TeleportClientState readState(FriendlyByteBuf buf) {
         int ordinal = buf.readVarInt();
         TeleportClientState[] values = TeleportClientState.values();
 
@@ -50,8 +57,10 @@ public record TeleportClientStatePayload(
         return values[ordinal];
     }
 
+    //? if >=1.20.5 {
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
+    //?}
 }

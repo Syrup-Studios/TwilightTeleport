@@ -2,8 +2,10 @@ package net.ochibo.twilightteleport.server;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//? if <1.20.5
+/*import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;*/
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.ochibo.twilightteleport.network.TeleportEffectAction;
 import net.ochibo.twilightteleport.network.TeleportEffectPayload;
 
@@ -18,18 +20,18 @@ final class TeleportEffectBroadcaster {
 
     static void sendToCurrentTrackers(
             PendingTeleportSession session,
-            ServerPlayerEntity target,
+            ServerPlayer target,
             TeleportEffectAction action,
             int delayTicks,
             int durationTicks,
             int elapsedTicks
     ) {
-        Set<ServerPlayerEntity> recipients =
+        Set<ServerPlayer> recipients =
                 new HashSet<>(PlayerLookup.tracking(target));
 
         recipients.add(target);
 
-        for (ServerPlayerEntity recipient : recipients) {
+        for (ServerPlayer recipient : recipients) {
             send(
                     session,
                     recipient,
@@ -43,7 +45,7 @@ final class TeleportEffectBroadcaster {
 
     static void sendToObserver(
             PendingTeleportSession session,
-            ServerPlayerEntity recipient,
+            ServerPlayer recipient,
             TeleportEffectAction action,
             int delayTicks,
             int durationTicks,
@@ -68,8 +70,8 @@ final class TeleportEffectBroadcaster {
             int elapsedTicks
     ) {
         for (UUID observerUuid : Set.copyOf(session.observers())) {
-            ServerPlayerEntity observer =
-                    server.getPlayerManager().getPlayer(observerUuid);
+            ServerPlayer observer =
+                    server.getPlayerList().getPlayer(observerUuid);
 
             if (observer != null) {
                 send(
@@ -86,7 +88,7 @@ final class TeleportEffectBroadcaster {
 
     private static void send(
             PendingTeleportSession session,
-            ServerPlayerEntity recipient,
+            ServerPlayer recipient,
             TeleportEffectAction action,
             int delayTicks,
             int durationTicks,
@@ -99,8 +101,9 @@ final class TeleportEffectBroadcaster {
             return;
         }
 
-        session.observers().add(recipient.getUuid());
+        session.observers().add(recipient.getUUID());
 
+        //? if >=1.20.5 {
         ServerPlayNetworking.send(
                 recipient,
                 new TeleportEffectPayload(
@@ -112,5 +115,21 @@ final class TeleportEffectBroadcaster {
                         elapsedTicks
                 )
         );
+        //?} else {
+        /*var buf = PacketByteBufs.create();
+        new TeleportEffectPayload(
+                session.sessionId(),
+                session.playerUuid(),
+                action,
+                delayTicks,
+                durationTicks,
+                elapsedTicks
+        ).write(buf);
+        ServerPlayNetworking.send(
+                recipient,
+                TeleportEffectPayload.ID,
+                buf
+        );
+        *///?}
     }
 }

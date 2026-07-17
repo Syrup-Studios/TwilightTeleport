@@ -1,10 +1,10 @@
 package net.ochibo.twilightteleport.client.sound;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 import net.ochibo.twilightteleport.network.TeleportEffectAction;
 import net.ochibo.twilightteleport.network.TeleportEffectPayload;
@@ -13,10 +13,10 @@ public final class TeleportEffectSoundPlayer {
 
     
     private static final SoundEvent DISSOLVE_SOUND =
-            SoundEvents.BLOCK_BEACON_ACTIVATE;
+            SoundEvents.BEACON_ACTIVATE;
 
     private static final SoundEvent REBUILD_SOUND =
-            SoundEvents.BLOCK_BEACON_DEACTIVATE;
+            SoundEvents.BEACON_DEACTIVATE;
 
     private static final float DISSOLVE_VOLUME = 0.85F;
     private static final float DISSOLVE_PITCH = 0.62F;
@@ -28,11 +28,11 @@ public final class TeleportEffectSoundPlayer {
     }
 
     public static void play(
-            MinecraftClient client,
+            Minecraft client,
             TeleportEffectPayload payload
     ) {
         if (!TwilightTeleportConfigManager.get().isSoundEnabled()
-                || client.world == null
+                || client.level == null
                 || payload.elapsedTicks() != 0) {
             return;
         }
@@ -55,8 +55,8 @@ public final class TeleportEffectSoundPlayer {
             return;
         }
 
-        PlayerEntity target =
-                client.world.getPlayerByUuid(
+        Player target =
+                client.level.getPlayerByUUID(
                         payload.playerUuid()
                 );
 
@@ -64,13 +64,13 @@ public final class TeleportEffectSoundPlayer {
             return;
         }
 
-        client.world.playSound(
+        client.level.playLocalSound(
                 target.getX(),
                 target.getY()
-                        + target.getHeight() * 0.5D,
+                        + target.getBbHeight() * 0.5D,
                 target.getZ(),
                 sound,
-                SoundCategory.PLAYERS,
+                SoundSource.PLAYERS,
                 volume,
                 pitch,
                 false
