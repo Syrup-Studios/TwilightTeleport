@@ -1,5 +1,8 @@
 package net.ochibo.twilightteleport.client.render;
 
+//? if <1.20.5 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+*///?}
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -11,8 +14,12 @@ import com.mojang.blaze3d.shaders.Uniform;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.joml.Matrix3f;
 
 public final class TeleportDissolveRenderState {
+    private static final Matrix3f IDENTITY_POSITION_TRANSFORM =
+            new Matrix3f();
+
     private static final float NOISE_SCALE = 0.1F;
     private static final float NOISE_STRENGTH = 0.18F;
     private static final float EDGE_WIDTH = 0.3F;
@@ -128,6 +135,8 @@ public final class TeleportDissolveRenderState {
                 (float) state.origin().y,
                 (float) state.origin().z
         );
+
+        setPositionTransform(program);
 
         setFloat(program, "EntityHeight", state.height());
         setFloat(program, "EffectTime", state.effectTime());
@@ -396,6 +405,25 @@ public final class TeleportDissolveRenderState {
         if (uniform != null) {
             uniform.set(x, y, z);
         }
+    }
+
+    private static void setPositionTransform(
+            ShaderInstance program
+    ) {
+        Uniform uniform =
+                program.getUniform("PositionTransform");
+
+        if (uniform == null) {
+            return;
+        }
+
+        //? if >=1.20.5 {
+        uniform.set(IDENTITY_POSITION_TRANSFORM);
+        //?} else {
+        /*uniform.set(
+                RenderSystem.getInverseViewRotationMatrix()
+        );
+        *///?}
     }
 
     public record FallbackSample(

@@ -1,9 +1,16 @@
 package net.ochibo.twilightteleport.client.render;
 
+//? if <1.20.5 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+*///?}
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.UUID;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+//? if <1.20.5 {
+/*import org.joml.Matrix3f;
+import org.joml.Vector3f;
+*///?}
 
 
 public final class TeleportHeightMeasuringVertexConsumerProvider
@@ -45,6 +52,10 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
         private final VertexConsumer delegate;
         private final UUID playerUuid;
 
+        //? if <1.20.5 {
+        /*private final Matrix3f positionTransform;
+        *///?}
+
         private final float[] quadX = new float[4];
         private final float[] quadY = new float[4];
         private final float[] quadZ = new float[4];
@@ -56,6 +67,12 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
         ) {
             this.delegate = delegate;
             this.playerUuid = playerUuid;
+
+            //? if <1.20.5 {
+            /*this.positionTransform = new Matrix3f(
+                    RenderSystem.getInverseViewRotationMatrix()
+            );
+            *///?}
         }
 
         //? if >=1.20.5 {
@@ -120,6 +137,17 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
                 float y,
                 float z
         ) {
+            //? if <1.20.5 {
+            /*Vector3f correctedPosition =
+                    positionTransform.transform(
+                            new Vector3f(x, y, z)
+                    );
+
+            x = correctedPosition.x();
+            y = correctedPosition.y();
+            z = correctedPosition.z();
+            *///?}
+
             TeleportRenderedHeightManager.recordVertex(
                     playerUuid,
                     x,

@@ -15,6 +15,7 @@ uniform sampler2D Sampler2;
 
 uniform mat4 ModelViewMat;
 uniform mat4 ProjMat;
+uniform mat3 PositionTransform;
 
 uniform vec3 Light0_Direction;
 uniform vec3 Light1_Direction;
@@ -33,6 +34,9 @@ out vec2 texCoord0;
 out vec3 playerRelativePosition;
 
 void main() {
+    vec3 correctedPosition =
+        PositionTransform * Position;
+
     vec4 viewPosition =
         ModelViewMat * vec4(Position, 1.0);
 
@@ -41,10 +45,14 @@ void main() {
 
     //? if >=1.20.5 {
     vertexDistance =
-        fog_distance(viewPosition.xyz, FogShape);
+        fog_distance(Position, FogShape);
     //?} else {
     /*vertexDistance =
-        fog_distance(ModelViewMat, Position, FogShape);
+        fog_distance(
+            ModelViewMat,
+            correctedPosition,
+            FogShape
+        );
     *///?}
 
     vertexColor =
@@ -68,5 +76,5 @@ void main() {
      * 差を取るとプレイヤー足元基準の座標になる。
      */
     playerRelativePosition =
-        Position - EntityOrigin;
+        correctedPosition - EntityOrigin;
 }
