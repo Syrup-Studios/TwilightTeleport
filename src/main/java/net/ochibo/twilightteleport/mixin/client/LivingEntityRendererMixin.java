@@ -1,19 +1,19 @@
 package net.ochibo.twilightteleport.mixin.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.HeadFeatureRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.ochibo.twilightteleport.client.effect.TeleportEntityEffectManager;
 import net.ochibo.twilightteleport.client.render.TeleportDissolveRenderLayer;
 import net.ochibo.twilightteleport.client.render.TeleportDissolveRenderState;
@@ -35,52 +35,46 @@ public abstract class LivingEntityRendererMixin {
 
     @Inject(
             method =
-                    "render"
-                            + "(Lnet/minecraft/entity/LivingEntity;FF"
-                            + "Lnet/minecraft/client/util/math/MatrixStack;"
-                            + "Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+                    "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At("HEAD")
     )
     private void twilightTeleport$beginRenderedHeightMeasurement(
             LivingEntity entity,
             float yaw,
             float tickDelta,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light,
             CallbackInfo ci
     ) {
-        if (entity instanceof AbstractClientPlayerEntity player) {
+        if (entity instanceof AbstractClientPlayer player) {
             TeleportRenderedHeightManager.beginPlayerRender(
                     player,
                     tickDelta,
-                    player.getBodyYaw()
+                    player.getVisualRotationYInDegrees()
             );
         }
     }
 
     @Inject(
             method =
-                    "setupTransforms"
-                            + "(Lnet/minecraft/entity/LivingEntity;"
-                            + "Lnet/minecraft/client/util/math/MatrixStack;"
-                            + "FFFF)V",
+                    "setupRotations(Lnet/minecraft/world/entity/LivingEntity;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
             at = @At("HEAD")
     )
     private void twilightTeleport$captureActualBodyYaw(
             LivingEntity entity,
-            MatrixStack matrices,
+            PoseStack matrices,
             float animationProgress,
             float bodyYaw,
             float tickDelta,
             float scale,
             CallbackInfo ci
     ) {
-        if (entity instanceof AbstractClientPlayerEntity player
+        if (entity instanceof AbstractClientPlayer player
                 && TeleportRenderedHeightManager
-                .isMeasurementActive(player.getUuid())) {
+                .isMeasurementActive(player.getUUID())) {
             TeleportRenderedHeightManager.updateMeasurementRenderYaw(
-                    player.getUuid(),
+                    player.getUUID(),
                     bodyYaw
             );
         }
@@ -88,22 +82,19 @@ public abstract class LivingEntityRendererMixin {
 
     @Inject(
             method =
-                    "render"
-                            + "(Lnet/minecraft/entity/LivingEntity;FF"
-                            + "Lnet/minecraft/client/util/math/MatrixStack;"
-                            + "Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+                    "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At("TAIL")
     )
     private void twilightTeleport$finishRenderedHeightMeasurement(
             LivingEntity entity,
             float yaw,
             float tickDelta,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light,
             CallbackInfo ci
     ) {
-        if (entity instanceof AbstractClientPlayerEntity player) {
+        if (entity instanceof AbstractClientPlayer player) {
             TeleportRenderedHeightManager.endPlayerRender(player);
         }
     }
@@ -111,9 +102,7 @@ public abstract class LivingEntityRendererMixin {
     
     @Inject(
             method =
-                    "getRenderLayer"
-                            + "(Lnet/minecraft/entity/LivingEntity;ZZZ)"
-                            + "Lnet/minecraft/client/render/RenderLayer;",
+                    "getRenderType(Lnet/minecraft/world/entity/LivingEntity;ZZZ)Lnet/minecraft/client/renderer/RenderType;",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -122,10 +111,10 @@ public abstract class LivingEntityRendererMixin {
             boolean showBody,
             boolean translucent,
             boolean showOutline,
-            CallbackInfoReturnable<RenderLayer> cir
+            CallbackInfoReturnable<RenderType> cir
     ) {
         if (!(entity
-                instanceof AbstractClientPlayerEntity player)) {
+                instanceof AbstractClientPlayer player)) {
             return;
         }
 
@@ -134,7 +123,7 @@ public abstract class LivingEntityRendererMixin {
         }
 
         if (!TeleportEntityEffectManager
-                .shouldRenderDissolve(player.getUuid())) {
+                .shouldRenderDissolve(player.getUUID())) {
             return;
         }
 
@@ -144,16 +133,16 @@ public abstract class LivingEntityRendererMixin {
         }
 
         if (!((Object) this
-                instanceof PlayerEntityRenderer playerRenderer)) {
+                instanceof PlayerRenderer playerRenderer)) {
             return;
         }
 
-        MinecraftClient client =
-                MinecraftClient.getInstance();
+        Minecraft client =
+                Minecraft.getInstance();
 
         float tickDelta =
-                client.getRenderTickCounter()
-                        .getTickDelta(false);
+                client.getTimer()
+                        .getGameTimeDeltaPartialTick(false);
 
         TeleportDissolveRenderState.prepare(
                 player,
@@ -168,8 +157,8 @@ public abstract class LivingEntityRendererMixin {
 
         cir.setReturnValue(
                 TeleportDissolveRenderLayer.get(
-                        player.getUuid(),
-                        playerRenderer.getTexture(player)
+                        player.getUUID(),
+                        playerRenderer.getTextureLocation(player)
                 )
         );
     }
@@ -177,34 +166,28 @@ public abstract class LivingEntityRendererMixin {
     
     @Redirect(
             method =
-                    "render"
-                            + "(Lnet/minecraft/entity/LivingEntity;FF"
-                            + "Lnet/minecraft/client/util/math/MatrixStack;"
-                            + "Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+                    "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At(
                     value = "INVOKE",
                     target =
-                            "Lnet/minecraft/client/render/"
-                                    + "VertexConsumerProvider;getBuffer"
-                                    + "(Lnet/minecraft/client/render/RenderLayer;)"
-                                    + "Lnet/minecraft/client/render/VertexConsumer;"
+                            "Lnet/minecraft/client/renderer/MultiBufferSource;getBuffer(Lnet/minecraft/client/renderer/RenderType;)Lcom/mojang/blaze3d/vertex/VertexConsumer;"
             )
     )
     private VertexConsumer twilightTeleport$applyShaderPackFallbackToBody(
-            VertexConsumerProvider provider,
-            RenderLayer layer,
+            MultiBufferSource provider,
+            RenderType layer,
             LivingEntity entity,
             float yaw,
             float tickDelta,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light
     ) {
         VertexConsumer originalConsumer =
                 provider.getBuffer(layer);
 
         if (!(entity
-                instanceof AbstractClientPlayerEntity player)) {
+                instanceof AbstractClientPlayer player)) {
             return originalConsumer;
         }
 
@@ -216,11 +199,11 @@ public abstract class LivingEntityRendererMixin {
         VertexConsumer measuringConsumer =
                 TeleportRenderedHeightManager
                         .isMeasurementActive(
-                                player.getUuid()
+                                player.getUUID()
                         )
                         ? TeleportHeightMeasuringVertexConsumerProvider.wrap(
                         originalConsumer,
-                        player.getUuid()
+                        player.getUUID()
                 )
                         : originalConsumer;
 
@@ -231,7 +214,7 @@ public abstract class LivingEntityRendererMixin {
 
         if (!TeleportEntityEffectManager
                 .shouldRenderDissolve(
-                        player.getUuid()
+                        player.getUUID()
                 )) {
             return measuringConsumer;
         }
@@ -251,14 +234,14 @@ public abstract class LivingEntityRendererMixin {
         VertexConsumer shaderPackFallback =
                 new TeleportShaderPackFallbackVertexConsumer(
                         originalConsumer,
-                        player.getUuid()
+                        player.getUUID()
                 );
 
         return TeleportRenderedHeightManager
-                .isMeasurementActive(player.getUuid())
+                .isMeasurementActive(player.getUUID())
                 ? TeleportHeightMeasuringVertexConsumerProvider.wrap(
                 shaderPackFallback,
-                player.getUuid()
+                player.getUUID()
         )
                 : shaderPackFallback;
     }
@@ -266,18 +249,11 @@ public abstract class LivingEntityRendererMixin {
     
     @Redirect(
             method =
-                    "render"
-                            + "(Lnet/minecraft/entity/LivingEntity;FF"
-                            + "Lnet/minecraft/client/util/math/MatrixStack;"
-                            + "Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+                    "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At(
                     value = "INVOKE",
                     target =
-                            "Lnet/minecraft/client/render/entity/feature/"
-                                    + "FeatureRenderer;render"
-                                    + "(Lnet/minecraft/client/util/math/MatrixStack;"
-                                    + "Lnet/minecraft/client/render/VertexConsumerProvider;"
-                                    + "ILnet/minecraft/entity/Entity;FFFFFF)V"
+                            "Lnet/minecraft/client/renderer/entity/layers/RenderLayer;render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/Entity;FFFFFF)V"
             )
     )
     @SuppressWarnings({
@@ -285,9 +261,9 @@ public abstract class LivingEntityRendererMixin {
             "unchecked"
     })
     private void twilightTeleport$renderDissolvingFeatures(
-            FeatureRenderer featureRenderer,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            RenderLayer featureRenderer,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light,
             Entity entity,
             float limbAngle,
@@ -297,15 +273,15 @@ public abstract class LivingEntityRendererMixin {
             float headYaw,
             float headPitch
     ) {
-        VertexConsumerProvider selectedProvider =
+        MultiBufferSource selectedProvider =
                 vertexConsumers;
 
-        if (entity instanceof AbstractClientPlayerEntity player
+        if (entity instanceof AbstractClientPlayer player
                 && !TeleportShaderPackCompat.isShadowPass()) {
             boolean wantsDissolve =
                     TeleportEntityEffectManager
                             .shouldRenderDissolve(
-                                    player.getUuid()
+                                    player.getUUID()
                             );
 
             boolean snapshotReady =
@@ -324,13 +300,13 @@ public abstract class LivingEntityRendererMixin {
                     selectedProvider =
                             new TeleportShaderPackFallbackVertexConsumerProvider(
                                     selectedProvider,
-                                    player.getUuid()
+                                    player.getUUID()
                             );
                 } else {
                     selectedProvider =
                             new TeleportDissolveVertexConsumerProvider(
                                     selectedProvider,
-                                    player.getUuid()
+                                    player.getUUID()
                             );
                 }
             }
@@ -338,23 +314,23 @@ public abstract class LivingEntityRendererMixin {
             boolean measuresHeadSlot =
                     TeleportRenderedHeightManager
                             .isMeasurementActive(
-                                    player.getUuid()
+                                    player.getUUID()
                             )
-                            && !player.getEquippedStack(
+                            && !player.getItemBySlot(
                             EquipmentSlot.HEAD
                     ).isEmpty()
                             && (
                             featureRenderer
-                                    instanceof ArmorFeatureRenderer
+                                    instanceof HumanoidArmorLayer
                                     || featureRenderer
-                                    instanceof HeadFeatureRenderer
+                                    instanceof CustomHeadLayer
                     );
 
             if (measuresHeadSlot) {
                 selectedProvider =
                         new TeleportHeightMeasuringVertexConsumerProvider(
                                 selectedProvider,
-                                player.getUuid()
+                                player.getUUID()
                         );
             }
         }
@@ -376,8 +352,7 @@ public abstract class LivingEntityRendererMixin {
     
     @Inject(
             method =
-                    "getShadowRadius"
-                            + "(Lnet/minecraft/entity/LivingEntity;)F",
+                    "getShadowRadius(Lnet/minecraft/world/entity/LivingEntity;)F",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -385,9 +360,9 @@ public abstract class LivingEntityRendererMixin {
             LivingEntity entity,
             CallbackInfoReturnable<Float> cir
     ) {
-        if (entity instanceof AbstractClientPlayerEntity player
+        if (entity instanceof AbstractClientPlayer player
                 && TeleportEntityEffectManager
-                .shouldRenderDissolve(player.getUuid())) {
+                .shouldRenderDissolve(player.getUUID())) {
             cir.setReturnValue(0.0F);
         }
     }

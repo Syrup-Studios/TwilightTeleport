@@ -1,6 +1,6 @@
 package net.ochibo.twilightteleport.config;
 
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 
 public enum ShaderPackEffectQuality {
@@ -23,8 +23,8 @@ public enum ShaderPackEffectQuality {
         return subdivisions;
     }
 
-    public Text displayText() {
-        return Text.translatable(translationKey);
+    public Component displayText() {
+        return Component.translatable(translationKey);
     }
 
     public ShaderPackEffectQuality next() {

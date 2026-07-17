@@ -1,6 +1,6 @@
 package net.ochibo.twilightteleport.client.effect;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.client.render.TeleportDissolveRenderLayer;
 import net.ochibo.twilightteleport.client.render.TeleportDissolveRenderState;
@@ -75,8 +75,8 @@ public final class TeleportEntityEffectManager {
         }
     }
 
-    public static void tick(MinecraftClient client) {
-        if (client.world == null) {
+    public static void tick(Minecraft client) {
+        if (client.level == null) {
             return;
         }
 
@@ -276,10 +276,10 @@ public final class TeleportEntityEffectManager {
     }
 
     private static boolean isLocalControllerTarget(UUID playerUuid) {
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
         return client.player != null
-                && client.player.getUuid().equals(playerUuid)
+                && client.player.getUUID().equals(playerUuid)
                 && TeleportCameraController.isRunning();
     }
 

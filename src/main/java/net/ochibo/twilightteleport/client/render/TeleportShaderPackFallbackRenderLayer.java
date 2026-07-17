@@ -1,36 +1,35 @@
 package net.ochibo.twilightteleport.client.render;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.RenderType;
 
 
 public final class TeleportShaderPackFallbackRenderLayer
-        extends RenderLayer {
+        extends RenderType {
 
-    private static final Map<RenderLayer, RenderLayer> CACHE =
+    private static final Map<RenderType, RenderType> CACHE =
             new ConcurrentHashMap<>();
 
     private TeleportShaderPackFallbackRenderLayer(
             String name,
-            RenderLayer original,
+            RenderType original,
             LayerActions actions
     ) {
         super(
                 name,
-                original.getVertexFormat(),
-                original.getDrawMode(),
-                original.getExpectedBufferSize(),
-                original.hasCrumbling(),
+                original.format(),
+                original.mode(),
+                original.bufferSize(),
+                original.affectsCrumbling(),
                 true,
                 actions.startAction(),
                 actions.endAction()
         );
     }
 
-    public static RenderLayer wrap(RenderLayer original) {
+    public static RenderType wrap(RenderType original) {
         if (original
                 instanceof TeleportShaderPackFallbackRenderLayer) {
             return original;
@@ -46,7 +45,7 @@ public final class TeleportShaderPackFallbackRenderLayer
         CACHE.clear();
     }
 
-    private static RenderLayer create(RenderLayer original) {
+    private static RenderType create(RenderType original) {
         LayerActions actions =
                 createActions(original);
 
@@ -61,27 +60,27 @@ public final class TeleportShaderPackFallbackRenderLayer
     }
 
     private static LayerActions createActions(
-            RenderLayer original
+            RenderType original
     ) {
         Runnable startAction = () -> {
             
-            original.startDrawing();
+            original.setupRenderState();
 
             
-            RenderPhase.TRANSLUCENT_TRANSPARENCY
-                    .startDrawing();
+            RenderStateShard.TRANSLUCENT_TRANSPARENCY
+                    .setupRenderState();
 
             
-            RenderPhase.COLOR_MASK.startDrawing();
+            RenderStateShard.COLOR_WRITE.setupRenderState();
         };
 
         Runnable endAction = () -> {
-            RenderPhase.COLOR_MASK.endDrawing();
+            RenderStateShard.COLOR_WRITE.clearRenderState();
 
-            RenderPhase.TRANSLUCENT_TRANSPARENCY
-                    .endDrawing();
+            RenderStateShard.TRANSLUCENT_TRANSPARENCY
+                    .clearRenderState();
 
-            original.endDrawing();
+            original.clearRenderState();
         };
 
         return new LayerActions(

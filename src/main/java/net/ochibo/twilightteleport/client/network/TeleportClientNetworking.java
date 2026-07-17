@@ -2,7 +2,7 @@ package net.ochibo.twilightteleport.client.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.client.effect.TeleportEntityEffectManager;
 import net.ochibo.twilightteleport.client.sound.TeleportEffectSoundPlayer;
@@ -65,7 +65,7 @@ public final class TeleportClientNetworking {
     }
 
     private static void handleEffect(
-            MinecraftClient client,
+            Minecraft client,
             TeleportEffectPayload payload
     ) {
         TeleportEffectSoundPlayer.play(
@@ -76,7 +76,7 @@ public final class TeleportClientNetworking {
         TeleportEntityEffectManager.apply(payload);
 
         if (client.player == null
-                || !client.player.getUuid()
+                || !client.player.getUUID()
                 .equals(payload.playerUuid())) {
             return;
         }

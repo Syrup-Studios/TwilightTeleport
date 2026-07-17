@@ -1,17 +1,17 @@
 package net.ochibo.twilightteleport.client.render;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 public final class TeleportDissolveShaders {
-    private static final Identifier PROGRAM_ID =
-            Identifier.of("twilightteleport", "teleport_dissolve");
+    private static final ResourceLocation PROGRAM_ID =
+            ResourceLocation.fromNamespaceAndPath("twilightteleport", "teleport_dissolve");
 
     @Nullable
-    private static ShaderProgram program;
+    private static ShaderInstance program;
 
     private TeleportDissolveShaders() {
     }
@@ -20,14 +20,14 @@ public final class TeleportDissolveShaders {
         CoreShaderRegistrationCallback.EVENT.register(context ->
                 context.register(
                         PROGRAM_ID,
-                        VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL,
+                        DefaultVertexFormat.NEW_ENTITY,
                         loadedProgram -> program = loadedProgram
                 )
         );
     }
 
     @Nullable
-    public static ShaderProgram getProgram() {
+    public static ShaderInstance getProgram() {
         return program;
     }
 }

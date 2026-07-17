@@ -1,8 +1,8 @@
 package net.ochibo.twilightteleport.mixin;
 
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.RelativeMovement;
 import net.ochibo.twilightteleport.server.PendingTeleportManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,16 +12,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
 
-@Mixin(ServerPlayNetworkHandler.class)
+@Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerPlayNetworkHandlerTeleportMixin {
 
     @Shadow
-    public ServerPlayerEntity player;
+    public ServerPlayer player;
 
     @Inject(
             method =
-                    "requestTeleport"
-                            + "(DDDFFLjava/util/Set;)V",
+                    "teleport(DDDFFLjava/util/Set;)V",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -31,22 +30,22 @@ public abstract class ServerPlayNetworkHandlerTeleportMixin {
             double destinationZ,
             float yaw,
             float pitch,
-            Set<PositionFlag> flags,
+            Set<RelativeMovement> flags,
             CallbackInfo ci
     ) {
-        ServerPlayNetworkHandler handler =
-                (ServerPlayNetworkHandler) (Object) this;
+        ServerGamePacketListenerImpl handler =
+                (ServerGamePacketListenerImpl) (Object) this;
 
         
         boolean intercepted =
                 PendingTeleportManager
                         .interceptExternalTeleport(
                                 player,
-                                player.getServerWorld(),
+                                player.serverLevel(),
                                 destinationX,
                                 destinationY,
                                 destinationZ,
-                                () -> handler.requestTeleport(
+                                () -> handler.teleport(
                                         destinationX,
                                         destinationY,
                                         destinationZ,

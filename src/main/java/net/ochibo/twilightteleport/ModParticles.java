@@ -1,10 +1,10 @@
 package net.ochibo.twilightteleport;
 
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
-import net.minecraft.particle.SimpleParticleType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 
 public final class ModParticles {
 
@@ -16,8 +16,8 @@ public final class ModParticles {
 
     public static void register() {
         Registry.register(
-                Registries.PARTICLE_TYPE,
-                Identifier.of(
+                BuiltInRegistries.PARTICLE_TYPE,
+                ResourceLocation.fromNamespaceAndPath(
                         TwilightTeleport.MOD_ID,
                         "teleport_shard"
                 ),

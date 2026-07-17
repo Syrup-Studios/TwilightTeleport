@@ -1,10 +1,10 @@
 package net.ochibo.twilightteleport.mixin.client;
 
 import com.mojang.brigadier.ParseResults;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.TeleportCommandMatcher;
 import net.ochibo.twilightteleport.client.network.TeleportClientNetworking;
@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ClientPlayNetworkHandler.class)
+@Mixin(ClientPacketListener.class)
 public abstract class ClientPlayNetworkHandlerMixin {
 
     
@@ -22,7 +22,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
     private boolean twilightTeleport$bypassTeleportCommand;
 
     @Inject(
-            method = "sendChatCommand",
+            method = "sendCommand",
             at = @At("HEAD"),
             cancellable = true
     )
@@ -40,14 +40,14 @@ public abstract class ClientPlayNetworkHandlerMixin {
             return;
         }
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
-        if (client.player == null || client.world == null) {
+        if (client.player == null || client.level == null) {
             return;
         }
 
-        ClientPlayNetworkHandler networkHandler =
-                (ClientPlayNetworkHandler) (Object) this;
+        ClientPacketListener networkHandler =
+                (ClientPacketListener) (Object) this;
 
         
         if (TeleportClientNetworking.isServerInstalled()) {
@@ -66,7 +66,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
         Runnable sendOriginalCommand = () -> {
             twilightTeleport$bypassTeleportCommand = true;
-            networkHandler.sendChatCommand(command);
+            networkHandler.sendCommand(command);
         };
 
         TeleportCameraController.start(sendOriginalCommand);
@@ -79,7 +79,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Unique
     private static boolean twilightTeleport$canExecuteCommand(
-            ClientPlayNetworkHandler networkHandler,
+            ClientPacketListener networkHandler,
             String command
     ) {
         String normalized = command == null
@@ -96,12 +96,12 @@ public abstract class ClientPlayNetworkHandlerMixin {
             return false;
         }
 
-        ParseResults<CommandSource> parseResults =
+        ParseResults<SharedSuggestionProvider> parseResults =
                 networkHandler
-                        .getCommandDispatcher()
+                        .getCommands()
                         .parse(
                                 normalized,
-                                networkHandler.getCommandSource()
+                                networkHandler.getSuggestionsProvider()
                         );
 
         return !parseResults.getReader().canRead()
@@ -109,11 +109,11 @@ public abstract class ClientPlayNetworkHandlerMixin {
     }
 
     @Inject(
-            method = "onPlayerPositionLook",
+            method = "handleMovePlayer",
             at = @At("TAIL")
     )
     private void twilightTeleport$markTeleportArrival(
-            PlayerPositionLookS2CPacket packet,
+            ClientboundPlayerPositionPacket packet,
             CallbackInfo ci
     ) {
         if (TeleportCameraController.isWaitingForTeleport()) {

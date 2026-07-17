@@ -1,8 +1,8 @@
 package net.ochibo.twilightteleport.mixin.client;
 
-import net.minecraft.client.render.Camera;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.BlockView;
+import net.minecraft.client.Camera;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,11 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CameraMixin {
 
     @Inject(
-            method = "update",
+            method = "setup",
             at = @At("TAIL")
     )
     private void twilightTeleport$applyTeleportCamera(
-            BlockView area,
+            BlockGetter area,
             Entity focusedEntity,
             boolean thirdPerson,
             boolean inverseView,

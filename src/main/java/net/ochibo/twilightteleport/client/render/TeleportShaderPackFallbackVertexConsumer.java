@@ -1,9 +1,8 @@
 package net.ochibo.twilightteleport.client.render;
 
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
-
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +36,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public VertexConsumer vertex(
+    public VertexConsumer addVertex(
             float x,
             float y,
             float z
@@ -55,7 +54,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public VertexConsumer color(
+    public VertexConsumer setColor(
             int red,
             int green,
             int blue,
@@ -73,7 +72,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public VertexConsumer texture(
+    public VertexConsumer setUv(
             float u,
             float v
     ) {
@@ -86,7 +85,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public VertexConsumer overlay(
+    public VertexConsumer setUv1(
             int u,
             int v
     ) {
@@ -99,7 +98,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public VertexConsumer light(
+    public VertexConsumer setUv2(
             int u,
             int v
     ) {
@@ -112,7 +111,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public VertexConsumer normal(
+    public VertexConsumer setNormal(
             float x,
             float y,
             float z
@@ -128,7 +127,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     }
 
     @Override
-    public void vertex(
+    public void addVertex(
             float x,
             float y,
             float z,
@@ -309,7 +308,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
                         sample.colorMultiplier()
                 );
 
-        delegate.vertex(
+        delegate.addVertex(
                 vertex.x(),
                 vertex.y(),
                 vertex.z(),
@@ -347,29 +346,29 @@ public final class TeleportShaderPackFallbackVertexConsumer
             float progress
     ) {
         return new VertexData(
-                MathHelper.lerp(progress, start.x(), end.x()),
-                MathHelper.lerp(progress, start.y(), end.y()),
-                MathHelper.lerp(progress, start.z(), end.z()),
+                Mth.lerp(progress, start.x(), end.x()),
+                Mth.lerp(progress, start.y(), end.y()),
+                Mth.lerp(progress, start.z(), end.z()),
                 lerpColor(start.color(), end.color(), progress),
-                MathHelper.lerp(progress, start.u(), end.u()),
-                MathHelper.lerp(progress, start.v(), end.v()),
+                Mth.lerp(progress, start.u(), end.u()),
+                Mth.lerp(progress, start.v(), end.v()),
                 progress < 0.5F
                         ? start.overlay()
                         : end.overlay(),
                 progress < 0.5F
                         ? start.light()
                         : end.light(),
-                MathHelper.lerp(
+                Mth.lerp(
                         progress,
                         start.normalX(),
                         end.normalX()
                 ),
-                MathHelper.lerp(
+                Mth.lerp(
                         progress,
                         start.normalY(),
                         end.normalY()
                 ),
-                MathHelper.lerp(
+                Mth.lerp(
                         progress,
                         start.normalZ(),
                         end.normalZ()
@@ -384,7 +383,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
     ) {
         int alpha =
                 Math.round(
-                        MathHelper.lerp(
+                        Mth.lerpInt(
                                 progress,
                                 start >>> 24,
                                 end >>> 24
@@ -393,7 +392,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
 
         int red =
                 Math.round(
-                        MathHelper.lerp(
+                        Mth.lerpInt(
                                 progress,
                                 start >>> 16 & 0xFF,
                                 end >>> 16 & 0xFF
@@ -402,7 +401,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
 
         int green =
                 Math.round(
-                        MathHelper.lerp(
+                        Mth.lerpInt(
                                 progress,
                                 start >>> 8 & 0xFF,
                                 end >>> 8 & 0xFF
@@ -411,7 +410,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
 
         int blue =
                 Math.round(
-                        MathHelper.lerp(
+                        Mth.lerpInt(
                                 progress,
                                 start & 0xFF,
                                 end & 0xFF
@@ -428,10 +427,10 @@ public final class TeleportShaderPackFallbackVertexConsumer
             int component,
             float multiplier
     ) {
-        return MathHelper.clamp(
+        return Mth.clamp(
                 Math.round(
                         component
-                                * MathHelper.clamp(
+                                * Mth.clamp(
                                 multiplier,
                                 0.0F,
                                 1.0F

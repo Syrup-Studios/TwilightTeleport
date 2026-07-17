@@ -1,7 +1,7 @@
 package net.ochibo.twilightteleport;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 
 public final class CinematicWorldFreeze {
 
@@ -13,8 +13,8 @@ public final class CinematicWorldFreeze {
     }
 
     public static void freezeIfPossible() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        IntegratedServer server = client.getServer();
+        Minecraft client = Minecraft.getInstance();
+        IntegratedServer server = client.getSingleplayerServer();
 
         
         if (server == null) {
@@ -26,12 +26,12 @@ public final class CinematicWorldFreeze {
         
         server.execute(() -> {
             
-            if (server.getTickManager().isFrozen()) {
+            if (server.tickRateManager().isFrozen()) {
                 ownsFreeze = false;
                 return;
             }
 
-            server.getTickManager().setFrozen(true);
+            server.tickRateManager().setFrozen(true);
             ownsFreeze = true;
         });
     }
@@ -48,7 +48,7 @@ public final class CinematicWorldFreeze {
 
         server.execute(() -> {
             if (ownsFreeze) {
-                server.getTickManager().setFrozen(false);
+                server.tickRateManager().setFrozen(false);
             }
 
             ownsFreeze = false;

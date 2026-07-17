@@ -1,8 +1,8 @@
 package net.ochibo.twilightteleport.mixin;
 
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.RelativeMovement;
 import net.ochibo.twilightteleport.server.PendingTeleportManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,20 +12,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
 
-@Mixin(ServerPlayerEntity.class)
+@Mixin(ServerPlayer.class)
 public abstract class ServerPlayerEntityTeleportMixin {
 
     
     @Inject(
             method =
-                    "teleport"
-                            + "(Lnet/minecraft/server/world/ServerWorld;"
-                            + "DDDFF)V",
+                    "teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDFF)V",
             at = @At("HEAD"),
             cancellable = true
     )
     private void twilightTeleport$interceptWaystonesDimensionTeleport(
-            ServerWorld destinationWorld,
+            ServerLevel destinationWorld,
             double destinationX,
             double destinationY,
             double destinationZ,
@@ -33,8 +31,8 @@ public abstract class ServerPlayerEntityTeleportMixin {
             float pitch,
             CallbackInfo ci
     ) {
-        ServerPlayerEntity player =
-                (ServerPlayerEntity) (Object) this;
+        ServerPlayer player =
+                (ServerPlayer) (Object) this;
 
         boolean intercepted =
                 PendingTeleportManager
@@ -44,7 +42,7 @@ public abstract class ServerPlayerEntityTeleportMixin {
                                 destinationX,
                                 destinationY,
                                 destinationZ,
-                                () -> player.teleport(
+                                () -> player.teleportTo(
                                         destinationWorld,
                                         destinationX,
                                         destinationY,
@@ -61,24 +59,22 @@ public abstract class ServerPlayerEntityTeleportMixin {
 
     @Inject(
             method =
-                    "teleport"
-                            + "(Lnet/minecraft/server/world/ServerWorld;"
-                            + "DDDLjava/util/Set;FF)Z",
+                    "teleportTo(Lnet/minecraft/server/level/ServerLevel;DDDLjava/util/Set;FF)Z",
             at = @At("HEAD"),
             cancellable = true
     )
     private void twilightTeleport$interceptExternalTeleport(
-            ServerWorld destinationWorld,
+            ServerLevel destinationWorld,
             double destinationX,
             double destinationY,
             double destinationZ,
-            Set<PositionFlag> flags,
+            Set<RelativeMovement> flags,
             float yaw,
             float pitch,
             CallbackInfoReturnable<Boolean> cir
     ) {
-        ServerPlayerEntity player =
-                (ServerPlayerEntity) (Object) this;
+        ServerPlayer player =
+                (ServerPlayer) (Object) this;
 
         
         boolean intercepted =
@@ -89,7 +85,7 @@ public abstract class ServerPlayerEntityTeleportMixin {
                                 destinationX,
                                 destinationY,
                                 destinationZ,
-                                () -> player.teleport(
+                                () -> player.teleportTo(
                                         destinationWorld,
                                         destinationX,
                                         destinationY,

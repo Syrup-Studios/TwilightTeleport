@@ -4,10 +4,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.EntityTrackingEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import net.ochibo.twilightteleport.TeleportTimingProfile;
 import net.ochibo.twilightteleport.network.TeleportClientState;
 import net.ochibo.twilightteleport.network.TeleportClientStatePayload;
@@ -53,20 +53,20 @@ public final class PendingTeleportManager {
 
         ServerPlayConnectionEvents.DISCONNECT.register(
                 (handler, server) ->
-                        cancel(server, handler.player.getUuid())
+                        cancel(server, handler.player.getUUID())
         );
     }
 
     
     public static boolean interceptExternalTeleport(
-            ServerPlayerEntity player,
-            net.minecraft.server.world.ServerWorld destinationWorld,
+            ServerPlayer player,
+            net.minecraft.server.level.ServerLevel destinationWorld,
             double destinationX,
             double destinationY,
             double destinationZ,
             Runnable deferredTeleportAction
     ) {
-        UUID playerUuid = player.getUuid();
+        UUID playerUuid = player.getUUID();
 
         if (shouldBypassInterception(player)) {
             return false;
@@ -86,11 +86,11 @@ public final class PendingTeleportManager {
         }
 
         boolean dimensionChanged =
-                player.getServerWorld()
+                player.serverLevel()
                         != destinationWorld;
 
         double distanceSquared =
-                player.squaredDistanceTo(
+                player.distanceToSqr(
                         destinationX,
                         destinationY,
                         destinationZ
@@ -133,19 +133,19 @@ public final class PendingTeleportManager {
 
     
     public static void beginTeleportTargetTransition(
-            ServerPlayerEntity player
+            ServerPlayer player
     ) {
         TELEPORT_TARGET_BYPASS_DEPTH.merge(
-                player.getUuid(),
+                player.getUUID(),
                 1,
                 Integer::sum
         );
     }
 
     public static void endTeleportTargetTransition(
-            ServerPlayerEntity player
+            ServerPlayer player
     ) {
-        UUID playerUuid = player.getUuid();
+        UUID playerUuid = player.getUUID();
 
         TELEPORT_TARGET_BYPASS_DEPTH.computeIfPresent(
                 playerUuid,
@@ -157,9 +157,9 @@ public final class PendingTeleportManager {
     }
 
     private static boolean shouldBypassInterception(
-            ServerPlayerEntity player
+            ServerPlayer player
     ) {
-        UUID playerUuid = player.getUuid();
+        UUID playerUuid = player.getUUID();
 
         if (INTERCEPTION_BYPASS.contains(playerUuid)) {
             return true;
@@ -177,10 +177,10 @@ public final class PendingTeleportManager {
     }
 
     private static void runWithoutInterception(
-            ServerPlayerEntity player,
+            ServerPlayer player,
             Runnable action
     ) {
-        UUID playerUuid = player.getUuid();
+        UUID playerUuid = player.getUUID();
 
         INTERCEPTION_BYPASS.add(playerUuid);
 
@@ -192,11 +192,11 @@ public final class PendingTeleportManager {
     }
 
     public static void handleClientState(
-            ServerPlayerEntity player,
+            ServerPlayer player,
             TeleportClientStatePayload payload
     ) {
         PendingTeleportSession session =
-                SESSIONS.get(player.getUuid());
+                SESSIONS.get(player.getUUID());
 
         if (session == null
                 || !session.sessionId().equals(payload.sessionId())) {
@@ -222,7 +222,7 @@ public final class PendingTeleportManager {
     }
 
     private static void enterHiddenState(
-            ServerPlayerEntity player,
+            ServerPlayer player,
             PendingTeleportSession session
     ) {
         MinecraftServer server = player.getServer();
@@ -245,7 +245,7 @@ public final class PendingTeleportManager {
     }
 
     private static void performDeferredTeleport(
-            ServerPlayerEntity player,
+            ServerPlayer player,
             PendingTeleportSession session
     ) {
         Runnable action =
@@ -257,9 +257,9 @@ public final class PendingTeleportManager {
 
         enterHiddenState(player, session);
 
-        player.setVelocity(Vec3d.ZERO);
+        player.setDeltaMovement(Vec3.ZERO);
         player.setSprinting(false);
-        player.setSneaking(false);
+        player.setShiftKeyDown(false);
 
         runWithoutInterception(
                 player,
@@ -278,7 +278,7 @@ public final class PendingTeleportManager {
 
 
     private static void beginDestinationHold(
-            ServerPlayerEntity player,
+            ServerPlayer player,
             PendingTeleportSession session
     ) {
         if (session.timings().destinationHoldTicks() <= 0) {
@@ -300,7 +300,7 @@ public final class PendingTeleportManager {
     }
 
     private static void beginRebuild(
-            ServerPlayerEntity player,
+            ServerPlayer player,
             PendingTeleportSession session
     ) {
         session.setPhase(TeleportServerPhase.REBUILDING);
@@ -319,8 +319,8 @@ public final class PendingTeleportManager {
         for (PendingTeleportSession session
                 : new ArrayList<>(SESSIONS.values())) {
 
-            ServerPlayerEntity player =
-                    server.getPlayerManager()
+            ServerPlayer player =
+                    server.getPlayerList()
                             .getPlayer(session.playerUuid());
 
             if (player == null) {
@@ -330,9 +330,9 @@ public final class PendingTeleportManager {
 
             session.tick();
 
-            player.setVelocity(Vec3d.ZERO);
+            player.setDeltaMovement(Vec3.ZERO);
             player.setSprinting(false);
-            player.setSneaking(false);
+            player.setShiftKeyDown(false);
 
             switch (session.phase()) {
                 case DISSOLVING -> {
@@ -392,15 +392,15 @@ public final class PendingTeleportManager {
 
     private static void onStartTracking(
             Entity trackedEntity,
-            ServerPlayerEntity observer
+            ServerPlayer observer
     ) {
         if (!(trackedEntity
-                instanceof ServerPlayerEntity target)) {
+                instanceof ServerPlayer target)) {
             return;
         }
 
         PendingTeleportSession session =
-                SESSIONS.get(target.getUuid());
+                SESSIONS.get(target.getUUID());
 
         if (session == null) {
             return;

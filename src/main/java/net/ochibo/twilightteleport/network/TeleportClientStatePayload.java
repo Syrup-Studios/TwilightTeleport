@@ -1,9 +1,9 @@
 package net.ochibo.twilightteleport.network;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.ochibo.twilightteleport.TwilightTeleport;
 
 import java.util.UUID;
@@ -11,33 +11,33 @@ import java.util.UUID;
 public record TeleportClientStatePayload(
         UUID sessionId,
         TeleportClientState state
-) implements CustomPayload {
+) implements CustomPacketPayload {
 
-    public static final Id<TeleportClientStatePayload> ID =
-            new Id<>(Identifier.of(
+    public static final Type<TeleportClientStatePayload> ID =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(
                     TwilightTeleport.MOD_ID,
                     "teleport_client_state"
             ));
 
-    public static final PacketCodec<RegistryByteBuf, TeleportClientStatePayload> CODEC =
-            PacketCodec.of(
+    public static final StreamCodec<RegistryFriendlyByteBuf, TeleportClientStatePayload> CODEC =
+            StreamCodec.ofMember(
                     TeleportClientStatePayload::write,
                     TeleportClientStatePayload::new
             );
 
-    private TeleportClientStatePayload(RegistryByteBuf buf) {
+    private TeleportClientStatePayload(RegistryFriendlyByteBuf buf) {
         this(
-                buf.readUuid(),
+                buf.readUUID(),
                 readState(buf)
         );
     }
 
-    private void write(RegistryByteBuf buf) {
-        buf.writeUuid(sessionId);
+    private void write(RegistryFriendlyByteBuf buf) {
+        buf.writeUUID(sessionId);
         buf.writeVarInt(state.ordinal());
     }
 
-    private static TeleportClientState readState(RegistryByteBuf buf) {
+    private static TeleportClientState readState(RegistryFriendlyByteBuf buf) {
         int ordinal = buf.readVarInt();
         TeleportClientState[] values = TeleportClientState.values();
 
@@ -51,7 +51,7 @@ public record TeleportClientStatePayload(
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

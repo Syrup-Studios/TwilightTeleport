@@ -1,8 +1,8 @@
 package net.ochibo.twilightteleport.mixin.client;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.client.hud.TeleportLoadingStatusHud;
 import net.ochibo.twilightteleport.client.render.TeleportOverlayRenderer;
@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(InGameHud.class)
+@Mixin(Gui.class)
 public abstract class InGameHudMixin {
 
     @Inject(
@@ -20,8 +20,8 @@ public abstract class InGameHudMixin {
             cancellable = true
     )
     private void twilightTeleport$renderTeleportOverlay(
-            DrawContext context,
-            RenderTickCounter tickCounter,
+            GuiGraphics context,
+            DeltaTracker tickCounter,
             CallbackInfo ci
     ) {
         if (!TeleportCameraController.isRunning()) {

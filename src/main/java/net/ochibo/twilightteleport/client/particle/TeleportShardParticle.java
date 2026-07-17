@@ -1,19 +1,19 @@
 package net.ochibo.twilightteleport.client.particle;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.particle.ParticleFactory;
-import net.minecraft.client.particle.ParticleTextureSheet;
-import net.minecraft.client.particle.SpriteBillboardParticle;
-import net.minecraft.client.particle.SpriteProvider;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.particle.SimpleParticleType;
+import net.minecraft.client.particle.ParticleProvider;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SpriteSet;
+import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.world.entity.Entity;
 import net.ochibo.twilightteleport.client.effect.TeleportEntityEffectManager;
 import net.ochibo.twilightteleport.client.render.TeleportRenderedHeightManager;
 
 public final class TeleportShardParticle
-        extends SpriteBillboardParticle {
+        extends TextureSheetParticle {
 
     private static final double OUTGOING_UPWARD_ACCELERATION = 0.055D;
     private static final double OUTGOING_MAX_UPWARD_SPEED = 4.00D;
@@ -35,14 +35,14 @@ public final class TeleportShardParticle
     private final float targetReferenceYaw;
 
     private TeleportShardParticle(
-            ClientWorld world,
+            ClientLevel world,
             double x,
             double y,
             double z,
             double velocityX,
             double velocityY,
             double velocityZ,
-            SpriteProvider spriteProvider
+            SpriteSet spriteProvider
     ) {
         super(
                 world,
@@ -54,28 +54,28 @@ public final class TeleportShardParticle
                 velocityZ
         );
 
-        setSprite(spriteProvider);
+        pickSprite(spriteProvider);
 
         rebuilding = velocityY < 0.0D;
         targetEntityId = rebuilding
                 ? (int) Math.round(velocityX)
                 : -1;
 
-        collidesWithWorld = false;
-        gravityStrength = 0.0F;
-        velocityMultiplier = 1.0F;
+        hasPhysics = false;
+        gravity = 0.0F;
+        friction = 1.0F;
 
         if (rebuilding) {
-            maxAge = 70 + random.nextInt(20);
+            lifetime = 70 + random.nextInt(20);
 
-            AbstractClientPlayerEntity player =
+            AbstractClientPlayer player =
                     getTargetPlayer();
 
             if (player != null) {
                 targetOffsetX = x - player.getX();
                 targetOffsetY = velocityZ;
                 targetOffsetZ = z - player.getZ();
-                targetReferenceYaw = player.getBodyYaw();
+                targetReferenceYaw = player.getVisualRotationYInDegrees();
             } else {
                 targetOffsetX = 0.0D;
                 targetOffsetY = velocityZ;
@@ -83,29 +83,29 @@ public final class TeleportShardParticle
                 targetReferenceYaw = 0.0F;
             }
 
-            this.velocityX = 0.0D;
-            this.velocityY = -REBUILD_MAX_DOWNWARD_SPEED;
-            this.velocityZ = 0.0D;
+            this.xd = 0.0D;
+            this.yd = -REBUILD_MAX_DOWNWARD_SPEED;
+            this.zd = 0.0D;
         } else {
-            maxAge = 24 + random.nextInt(16);
+            lifetime = 24 + random.nextInt(16);
 
             targetOffsetX = 0.0D;
             targetOffsetY = 0.0D;
             targetOffsetZ = 0.0D;
             targetReferenceYaw = 0.0F;
 
-            this.velocityX = 0.0D;
-            this.velocityY = Math.max(0.025D, velocityY);
-            this.velocityZ = 0.0D;
+            this.xd = 0.0D;
+            this.yd = Math.max(0.025D, velocityY);
+            this.zd = 0.0D;
         }
 
-        scale =
+        quadSize =
                 0.035F
                         + random.nextFloat()
                         * 0.075F;
 
-        angle = 0.0F;
-        prevAngle = angle;
+        roll = 0.0F;
+        oRoll = roll;
 
         setColor(
                 0.018F,
@@ -118,7 +118,7 @@ public final class TeleportShardParticle
 
     @Override
     public void tick() {
-        prevAngle = angle;
+        oRoll = roll;
 
         if (rebuilding) {
             tickRebuilding();
@@ -128,19 +128,19 @@ public final class TeleportShardParticle
     }
 
     private void tickOutgoing() {
-        velocityX = 0.0D;
-        velocityZ = 0.0D;
+        xd = 0.0D;
+        zd = 0.0D;
 
-        velocityY =
+        yd =
                 Math.min(
-                        velocityY
+                        yd
                                 + OUTGOING_UPWARD_ACCELERATION,
                         OUTGOING_MAX_UPWARD_SPEED
                 );
 
         super.tick();
 
-        float lifeProgress = age / (float) maxAge;
+        float lifeProgress = age / (float) lifetime;
 
         setAlpha(
                 1.0F
@@ -150,29 +150,29 @@ public final class TeleportShardParticle
     }
 
     private void tickRebuilding() {
-        AbstractClientPlayerEntity player =
+        AbstractClientPlayer player =
                 getTargetPlayer();
 
         if (player == null
                 || !TeleportEntityEffectManager
-                .isRebuilding(player.getUuid())) {
-            markDead();
+                .isRebuilding(player.getUUID())) {
+            remove();
             return;
         }
 
         
-        net.minecraft.util.math.Vec3d rotatedOffset =
+        net.minecraft.world.phys.Vec3 rotatedOffset =
                 TeleportRenderedHeightManager.rotateHorizontalOffset(
                         targetOffsetX,
                         targetOffsetZ,
                         targetReferenceYaw,
-                        player.getBodyYaw()
+                        player.getVisualRotationYInDegrees()
                 );
 
         x = player.getX() + rotatedOffset.x;
         z = player.getZ() + rotatedOffset.z;
-        prevPosX = x;
-        prevPosZ = z;
+        xo = x;
+        zo = z;
 
         double targetY =
                 player.getY() + targetOffsetY;
@@ -181,12 +181,12 @@ public final class TeleportShardParticle
 
         if (remainingDistance
                 <= REBUILD_ARRIVAL_DISTANCE) {
-            markDead();
+            remove();
             return;
         }
 
-        velocityX = 0.0D;
-        velocityZ = 0.0D;
+        xd = 0.0D;
+        zd = 0.0D;
 
         double normalizedDistance =
                 Math.min(
@@ -214,7 +214,7 @@ public final class TeleportShardParticle
                         remainingDistance
                 );
 
-        velocityY = -downwardSpeed;
+        yd = -downwardSpeed;
 
         super.tick();
 
@@ -231,7 +231,7 @@ public final class TeleportShardParticle
         float ageAlpha =
                 1.0F
                         - age
-                        / (float) maxAge;
+                        / (float) lifetime;
 
         setAlpha(
                 Math.max(
@@ -244,15 +244,15 @@ public final class TeleportShardParticle
         );
     }
 
-    private AbstractClientPlayerEntity getTargetPlayer() {
+    private AbstractClientPlayer getTargetPlayer() {
         if (!rebuilding) {
             return null;
         }
 
-        Entity entity = world.getEntityById(targetEntityId);
+        Entity entity = level.getEntity(targetEntityId);
 
         if (entity
-                instanceof AbstractClientPlayerEntity player) {
+                instanceof AbstractClientPlayer player) {
             return player;
         }
 
@@ -260,23 +260,23 @@ public final class TeleportShardParticle
     }
 
     @Override
-    public ParticleTextureSheet getType() {
-        return ParticleTextureSheet.PARTICLE_SHEET_TRANSLUCENT;
+    public ParticleRenderType getRenderType() {
+        return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
     }
 
     public static final class Factory
-            implements ParticleFactory<SimpleParticleType> {
+            implements ParticleProvider<SimpleParticleType> {
 
-        private final SpriteProvider spriteProvider;
+        private final SpriteSet spriteProvider;
 
-        public Factory(SpriteProvider spriteProvider) {
+        public Factory(SpriteSet spriteProvider) {
             this.spriteProvider = spriteProvider;
         }
 
         @Override
         public Particle createParticle(
                 SimpleParticleType parameters,
-                ClientWorld world,
+                ClientLevel world,
                 double x,
                 double y,
                 double z,
