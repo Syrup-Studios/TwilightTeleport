@@ -1,5 +1,6 @@
 package net.ochibo.twilightteleport.client.render;
 
+//? if >=1.20.5
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Mth;
@@ -15,8 +16,13 @@ public final class TeleportOverlayRenderer {
 
     public static void render(
             GuiGraphics context,
+            //? if >=1.20.5 {
             DeltaTracker tickCounter
+            //?} else {
+            /*float tickDelta
+            *///?}
     ) {
+        //? if >=1.20.5
         float tickDelta = tickCounter.getGameTimeDeltaPartialTick(false);
 
         renderLetterbox(context, tickDelta);

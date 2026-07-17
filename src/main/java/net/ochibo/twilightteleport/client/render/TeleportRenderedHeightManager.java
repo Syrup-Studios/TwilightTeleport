@@ -783,10 +783,17 @@ public final class TeleportRenderedHeightManager {
                     && right.isEmpty();
         }
 
+        //? if >=1.20.5 {
         return ItemStack.isSameItemSameComponents(
                 left,
                 right
         );
+        //?} else {
+        /*return ItemStack.isSameItemSameTags(
+                left,
+                right
+        );
+        *///?}
     }
 
     private static float getOverrideHeight(

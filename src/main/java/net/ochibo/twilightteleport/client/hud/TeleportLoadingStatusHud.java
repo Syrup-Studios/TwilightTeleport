@@ -1,5 +1,6 @@
 package net.ochibo.twilightteleport.client.hud;
 
+//? if >=1.20.5
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,7 +36,11 @@ public final class TeleportLoadingStatusHud {
 
     public static void render(
             GuiGraphics drawContext,
+            //? if >=1.20.5 {
             DeltaTracker tickCounter
+            //?} else {
+            /*float tickDelta
+            *///?}
     ) {
         boolean shouldShow =
                 TwilightTeleportConfigManager

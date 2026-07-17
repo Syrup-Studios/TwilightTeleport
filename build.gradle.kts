@@ -78,10 +78,16 @@ tasks {
             "version" to project.version.toString(),
             "loader_version" to loaderVersion,
             "minecraft_version" to minecraftVersion,
+            "java_version" to requiredJava.majorVersion,
         )
         props.forEach { (key, value) -> inputs.property(key, value) }
 
-        filesMatching("fabric.mod.json") { expand(props) }
+        filesMatching(
+            listOf(
+                "fabric.mod.json",
+                "twilightteleport.mixins.json",
+            )
+        ) { expand(props) }
     }
 
     // Builds the version into a shared folder in `build/libs/${mod version}/`

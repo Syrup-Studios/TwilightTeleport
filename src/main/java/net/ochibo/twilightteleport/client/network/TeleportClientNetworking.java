@@ -2,6 +2,8 @@ package net.ochibo.twilightteleport.client.network;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+//? if <1.20.5
+/*import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;*/
 import net.minecraft.client.Minecraft;
 import net.ochibo.twilightteleport.TeleportCameraController;
 import net.ochibo.twilightteleport.client.effect.TeleportEntityEffectManager;
@@ -19,6 +21,7 @@ public final class TeleportClientNetworking {
     }
 
     public static void register() {
+        //? if >=1.20.5 {
         ClientPlayNetworking.registerGlobalReceiver(
                 TeleportEffectPayload.ID,
                 (payload, context) ->
@@ -29,6 +32,19 @@ public final class TeleportClientNetworking {
                                 )
                         )
         );
+        //?} else {
+        /*ClientPlayNetworking.registerGlobalReceiver(
+                TeleportEffectPayload.ID,
+                (client, handler, buf, responseSender) -> {
+                    TeleportEffectPayload payload =
+                            new TeleportEffectPayload(buf);
+
+                    client.execute(() ->
+                            handleEffect(client, payload)
+                    );
+                }
+        );
+        *///?}
 
         ClientPlayConnectionEvents.DISCONNECT.register(
                 (handler, client) -> {
@@ -56,12 +72,24 @@ public final class TeleportClientNetworking {
             return;
         }
 
+        //? if >=1.20.5 {
         ClientPlayNetworking.send(
                 new TeleportClientStatePayload(
                         sessionId,
                         state
                 )
         );
+        //?} else {
+        /*var buf = PacketByteBufs.create();
+        new TeleportClientStatePayload(
+                sessionId,
+                state
+        ).write(buf);
+        ClientPlayNetworking.send(
+                TeleportClientStatePayload.ID,
+                buf
+        );
+        *///?}
     }
 
     private static void handleEffect(

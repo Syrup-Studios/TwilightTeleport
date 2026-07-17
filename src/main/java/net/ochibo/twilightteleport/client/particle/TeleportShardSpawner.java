@@ -3,6 +3,7 @@ package net.ochibo.twilightteleport.client.particle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.phys.Vec3;
 import net.ochibo.twilightteleport.ModParticles;
@@ -145,7 +146,7 @@ public final class TeleportShardSpawner {
                         );
 
         float particleBoundaryProgress =
-                Math.clamp(
+                Mth.clamp(
                         rebuildProgress
                                 / PARTICLE_REBUILD_TIME,
                         0.0F,

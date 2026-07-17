@@ -11,7 +11,7 @@ public final class TeleportDissolveVertexConsumerProvider
         implements MultiBufferSource {
 
     private static final VertexConsumer DISCARDING_CONSUMER =
-            new DiscardingVertexConsumer();
+            TeleportDiscardingVertexConsumer.INSTANCE;
 
     private final MultiBufferSource delegate;
     private final UUID playerUuid;
@@ -40,59 +40,4 @@ public final class TeleportDissolveVertexConsumerProvider
         );
     }
 
-    private static final class DiscardingVertexConsumer
-            implements VertexConsumer {
-
-        @Override
-        public VertexConsumer addVertex(
-                float x,
-                float y,
-                float z
-        ) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setColor(
-                int red,
-                int green,
-                int blue,
-                int alpha
-        ) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv(
-                float u,
-                float v
-        ) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv1(
-                int u,
-                int v
-        ) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setUv2(
-                int u,
-                int v
-        ) {
-            return this;
-        }
-
-        @Override
-        public VertexConsumer setNormal(
-                float x,
-                float y,
-                float z
-        ) {
-            return this;
-        }
-    }
 }

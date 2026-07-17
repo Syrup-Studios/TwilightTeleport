@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
+import net.ochibo.twilightteleport.mixin.client.RenderTypeAccessor;
 
 
 public final class TeleportDissolveRenderLayer
@@ -124,7 +125,12 @@ public final class TeleportDissolveRenderLayer
                 original.mode(),
                 original.bufferSize(),
                 original.affectsCrumbling(),
+                //? if >=1.20.5 {
                 original.sortOnUpload(),
+                //?} else {
+                /*((RenderTypeAccessor) (Object) original)
+                        .twilightTeleport$sortOnUpload(),
+                *///?}
                 actions
         );
     }

@@ -1,5 +1,6 @@
 package net.ochibo.twilightteleport.mixin.client;
 
+//? if >=1.20.5
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,7 +22,11 @@ public abstract class InGameHudMixin {
     )
     private void twilightTeleport$renderTeleportOverlay(
             GuiGraphics context,
+            //? if >=1.20.5 {
             DeltaTracker tickCounter,
+            //?} else {
+            /*float tickCounter,
+            *///?}
             CallbackInfo ci
     ) {
         if (!TeleportCameraController.isRunning()) {

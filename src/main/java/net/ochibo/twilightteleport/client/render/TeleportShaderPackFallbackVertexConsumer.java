@@ -19,6 +19,8 @@ public final class TeleportShaderPackFallbackVertexConsumer
             new ArrayList<>(4);
 
     private MutableVertex pendingVertex;
+    private int defaultColor = 0xFFFFFFFF;
+    private boolean defaultColorSet;
 
     public TeleportShaderPackFallbackVertexConsumer(
             VertexConsumer delegate,
@@ -35,6 +37,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
         );
     }
 
+    //? if >=1.20.5 {
     @Override
     public VertexConsumer addVertex(
             float x,
@@ -44,15 +47,28 @@ public final class TeleportShaderPackFallbackVertexConsumer
         finishPendingVertex();
 
         pendingVertex =
-                new MutableVertex(
-                        x,
-                        y,
-                        z
-                );
+                createPendingVertex(x, y, z);
 
         return this;
     }
+    //?} else {
+    /*@Override
+    public VertexConsumer vertex(
+            double x,
+            double y,
+            double z
+    ) {
+        finishPendingVertex();
+        pendingVertex = createPendingVertex(
+                (float) x,
+                (float) y,
+                (float) z
+        );
+        return this;
+    }
+    *///?}
 
+    //? if >=1.20.5 {
     @Override
     public VertexConsumer setColor(
             int red,
@@ -125,7 +141,76 @@ public final class TeleportShaderPackFallbackVertexConsumer
         finishPendingVertex();
         return this;
     }
+    //?} else {
+    /*@Override
+    public VertexConsumer color(
+            int red,
+            int green,
+            int blue,
+            int alpha
+    ) {
+        ensurePendingVertex();
+        pendingVertex.color =
+                alpha << 24
+                        | red << 16
+                        | green << 8
+                        | blue;
+        return this;
+    }
 
+    @Override
+    public VertexConsumer uv(float u, float v) {
+        ensurePendingVertex();
+        pendingVertex.u = u;
+        pendingVertex.v = v;
+        return this;
+    }
+
+    @Override
+    public VertexConsumer overlayCoords(int u, int v) {
+        ensurePendingVertex();
+        pendingVertex.overlay = u | v << 16;
+        return this;
+    }
+
+    @Override
+    public VertexConsumer uv2(int u, int v) {
+        ensurePendingVertex();
+        pendingVertex.light = u | v << 16;
+        return this;
+    }
+
+    @Override
+    public VertexConsumer normal(float x, float y, float z) {
+        ensurePendingVertex();
+        pendingVertex.normalX = x;
+        pendingVertex.normalY = y;
+        pendingVertex.normalZ = z;
+        return this;
+    }
+
+    @Override
+    public void endVertex() {
+        finishPendingVertex();
+    }
+
+    @Override
+    public void defaultColor(int red, int green, int blue, int alpha) {
+        defaultColor =
+                alpha << 24
+                        | red << 16
+                        | green << 8
+                        | blue;
+        defaultColorSet = true;
+    }
+
+    @Override
+    public void unsetDefaultColor() {
+        defaultColorSet = false;
+    }
+    *///?}
+
+    //? if >=1.20.5 {
     @Override
     public void addVertex(
             float x,
@@ -158,11 +243,26 @@ public final class TeleportShaderPackFallbackVertexConsumer
                 )
         );
     }
+    //?}
+
+    private MutableVertex createPendingVertex(
+            float x,
+            float y,
+            float z
+    ) {
+        MutableVertex vertex = new MutableVertex(x, y, z);
+
+        if (defaultColorSet) {
+            vertex.color = defaultColor;
+        }
+
+        return vertex;
+    }
 
     private void ensurePendingVertex() {
         if (pendingVertex == null) {
             pendingVertex =
-                    new MutableVertex(
+                    createPendingVertex(
                             0.0F,
                             0.0F,
                             0.0F
@@ -308,6 +408,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
                         sample.colorMultiplier()
                 );
 
+        //? if >=1.20.5 {
         delegate.addVertex(
                 vertex.x(),
                 vertex.y(),
@@ -321,6 +422,23 @@ public final class TeleportShaderPackFallbackVertexConsumer
                 vertex.normalY(),
                 vertex.normalZ()
         );
+        //?} else {
+        /*delegate.vertex(
+                        vertex.x(),
+                        vertex.y(),
+                        vertex.z()
+                )
+                .color(modifiedColor)
+                .uv(vertex.u(), vertex.v())
+                .overlayCoords(vertex.overlay())
+                .uv2(vertex.light())
+                .normal(
+                        vertex.normalX(),
+                        vertex.normalY(),
+                        vertex.normalZ()
+                )
+                .endVertex();
+        *///?}
     }
 
     private static VertexData bilerp(

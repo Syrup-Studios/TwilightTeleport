@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 
 public final class ModParticles {
 
@@ -17,10 +16,7 @@ public final class ModParticles {
     public static void register() {
         Registry.register(
                 BuiltInRegistries.PARTICLE_TYPE,
-                ResourceLocation.fromNamespaceAndPath(
-                        TwilightTeleport.MOD_ID,
-                        "teleport_shard"
-                ),
+                TwilightTeleport.id("teleport_shard"),
                 TELEPORT_SHARD
         );
     }

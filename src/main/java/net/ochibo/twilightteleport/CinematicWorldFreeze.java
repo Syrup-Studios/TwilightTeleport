@@ -23,7 +23,7 @@ public final class CinematicWorldFreeze {
 
         frozenServer = server;
 
-        
+        //? if >=1.20.3 {
         server.execute(() -> {
             
             if (server.tickRateManager().isFrozen()) {
@@ -34,6 +34,11 @@ public final class CinematicWorldFreeze {
             server.tickRateManager().setFrozen(true);
             ownsFreeze = true;
         });
+        //?} else {
+        /*// Minecraft 1.20.1 has no tick-rate manager. The cinematic
+        // continues without freezing the integrated server on this target.
+        ownsFreeze = false;
+        *///?}
     }
 
     public static void unfreeze() {
@@ -46,6 +51,7 @@ public final class CinematicWorldFreeze {
             return;
         }
 
+        //? if >=1.20.3 {
         server.execute(() -> {
             if (ownsFreeze) {
                 server.tickRateManager().setFrozen(false);
@@ -53,5 +59,8 @@ public final class CinematicWorldFreeze {
 
             ownsFreeze = false;
         });
+        //?} else {
+        /*ownsFreeze = false;
+        *///?}
     }
 }

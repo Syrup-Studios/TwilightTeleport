@@ -57,8 +57,13 @@ public abstract class LivingEntityRendererMixin {
     }
 
     @Inject(
+            //? if >=1.20.5 {
             method =
                     "setupRotations(Lnet/minecraft/world/entity/LivingEntity;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
+            //?} else {
+            /*method =
+                    "setupRotations(Lnet/minecraft/world/entity/LivingEntity;Lcom/mojang/blaze3d/vertex/PoseStack;FFF)V",
+            *///?}
             at = @At("HEAD")
     )
     private void twilightTeleport$captureActualBodyYaw(
@@ -67,6 +72,7 @@ public abstract class LivingEntityRendererMixin {
             float animationProgress,
             float bodyYaw,
             float tickDelta,
+            //? if >=1.20.5
             float scale,
             CallbackInfo ci
     ) {
@@ -99,7 +105,6 @@ public abstract class LivingEntityRendererMixin {
         }
     }
 
-    
     @Inject(
             method =
                     "getRenderType(Lnet/minecraft/world/entity/LivingEntity;ZZZ)Lnet/minecraft/client/renderer/RenderType;",
@@ -140,9 +145,13 @@ public abstract class LivingEntityRendererMixin {
         Minecraft client =
                 Minecraft.getInstance();
 
+        //? if >=1.20.5 {
         float tickDelta =
                 client.getTimer()
                         .getGameTimeDeltaPartialTick(false);
+        //?} else {
+        /*float tickDelta = client.getFrameTime();
+        *///?}
 
         TeleportDissolveRenderState.prepare(
                 player,
@@ -350,6 +359,7 @@ public abstract class LivingEntityRendererMixin {
     }
 
     
+    //? if >=1.20.5 {
     @Inject(
             method =
                     "getShadowRadius(Lnet/minecraft/world/entity/LivingEntity;)F",
@@ -366,4 +376,5 @@ public abstract class LivingEntityRendererMixin {
             cir.setReturnValue(0.0F);
         }
     }
+    //?}
 }

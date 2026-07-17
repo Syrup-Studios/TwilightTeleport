@@ -246,7 +246,11 @@ public final class TwilightTeleportConfigScreen extends Screen {
             int mouseY,
             float delta
     ) {
+        //? if >=1.20.5 {
         renderBackground(context, mouseX, mouseY, delta);
+        //?} else {
+        /*renderBackground(context);
+        *///?}
         super.render(context, mouseX, mouseY, delta);
 
         context.drawCenteredString(

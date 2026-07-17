@@ -58,6 +58,7 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
             this.playerUuid = playerUuid;
         }
 
+        //? if >=1.20.5 {
         @Override
         public VertexConsumer addVertex(
                 float x,
@@ -68,7 +69,20 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
             delegate.addVertex(x, y, z);
             return this;
         }
+        //?} else {
+        /*@Override
+        public VertexConsumer vertex(
+                double x,
+                double y,
+                double z
+        ) {
+            recordPosition((float) x, (float) y, (float) z);
+            delegate.vertex(x, y, z);
+            return this;
+        }
+        *///?}
 
+        //? if >=1.20.5 {
         @Override
         public void addVertex(
                 float x,
@@ -99,6 +113,7 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
                     normalZ
             );
         }
+        //?}
 
         private void recordPosition(
                 float x,
@@ -156,6 +171,7 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
             return start + (end - start) * progress;
         }
 
+        //? if >=1.20.5 {
         @Override
         public VertexConsumer setColor(
                 int red,
@@ -203,5 +219,56 @@ public final class TeleportHeightMeasuringVertexConsumerProvider
             delegate.setNormal(x, y, z);
             return this;
         }
+        //?} else {
+        /*@Override
+        public VertexConsumer color(
+                int red,
+                int green,
+                int blue,
+                int alpha
+        ) {
+            delegate.color(red, green, blue, alpha);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv(float u, float v) {
+            delegate.uv(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer overlayCoords(int u, int v) {
+            delegate.overlayCoords(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv2(int u, int v) {
+            delegate.uv2(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer normal(float x, float y, float z) {
+            delegate.normal(x, y, z);
+            return this;
+        }
+
+        @Override
+        public void endVertex() {
+            delegate.endVertex();
+        }
+
+        @Override
+        public void defaultColor(int red, int green, int blue, int alpha) {
+            delegate.defaultColor(red, green, blue, alpha);
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            delegate.unsetDefaultColor();
+        }
+        *///?}
     }
 }

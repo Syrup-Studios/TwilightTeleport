@@ -39,8 +39,13 @@ void main() {
     gl_Position =
         ProjMat * viewPosition;
 
+    //? if >=1.20.5 {
     vertexDistance =
         fog_distance(viewPosition.xyz, FogShape);
+    //?} else {
+    /*vertexDistance =
+        fog_distance(ModelViewMat, Position, FogShape);
+    *///?}
 
     vertexColor =
         minecraft_mix_light(

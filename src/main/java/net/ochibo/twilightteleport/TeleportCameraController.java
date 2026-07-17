@@ -4,7 +4,11 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.player.LocalPlayer;
+//? if >=1.20.5 {
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
+//?} else {
+/*import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
+*///?}
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
@@ -12,7 +16,11 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
+//? if >=1.20.5 {
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+//?} else {
+/*import net.minecraft.world.level.chunk.ChunkStatus;
+*///?}
 import net.minecraft.world.phys.Vec3;
 import net.ochibo.twilightteleport.client.network.TeleportClientNetworking;
 import net.ochibo.twilightteleport.network.TeleportClientState;
@@ -956,8 +964,13 @@ public final class TeleportCameraController {
             return false;
         }
 
+        //? if >=1.20.5 {
         SectionRenderDispatcher chunkBuilder =
                 client.levelRenderer.getSectionRenderDispatcher();
+        //?} else {
+        /*ChunkRenderDispatcher chunkBuilder =
+                client.levelRenderer.getChunkRenderDispatcher();
+        *///?}
 
         if (chunkBuilder == null) {
             emptyRenderQueueStableTicks = 0;
@@ -970,8 +983,15 @@ public final class TeleportCameraController {
         loadingStatus =
                 LoadingStatus.PREPARING_RENDER;
 
-        if (!client.levelRenderer
-                .isSectionCompiled(player.blockPosition())) {
+        //? if >=1.20.5 {
+        boolean playerSectionCompiled = client.levelRenderer
+                .isSectionCompiled(player.blockPosition());
+        //?} else {
+        /*boolean playerSectionCompiled = client.levelRenderer
+                .isChunkCompiled(player.blockPosition());
+        *///?}
+
+        if (!playerSectionCompiled) {
             if (canFinishWithoutRenderableTerrain(
                     client,
                     player,
@@ -991,8 +1011,15 @@ public final class TeleportCameraController {
         loadingStatus =
                 LoadingStatus.BUILDING_TERRAIN;
 
-        if (!client.levelRenderer
-                .hasRenderedAllSections()) {
+        //? if >=1.20.5 {
+        boolean renderedAllSections = client.levelRenderer
+                .hasRenderedAllSections();
+        //?} else {
+        /*boolean renderedAllSections = client.levelRenderer
+                .hasRenderedAllChunks();
+        *///?}
+
+        if (!renderedAllSections) {
             return false;
         }
 
@@ -1021,7 +1048,11 @@ public final class TeleportCameraController {
     private static boolean canFinishWithoutRenderableTerrain(
             Minecraft client,
             LocalPlayer player,
+            //? if >=1.20.5 {
             SectionRenderDispatcher chunkBuilder
+            //?} else {
+            /*ChunkRenderDispatcher chunkBuilder
+            *///?}
     ) {
         boolean renderQueueIdle =
                 chunkBuilder.isQueueEmpty()

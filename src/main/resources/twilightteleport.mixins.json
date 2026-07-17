@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "net.ochibo.twilightteleport.mixin",
-  "compatibilityLevel": "JAVA_21",
+  "compatibilityLevel": "JAVA_${java_version}",
   "mixins": [
     "ServerPlayerEntityTeleportMixin",
     "ServerPlayerEntityTeleportTargetMixin",
@@ -13,11 +13,13 @@
     "client.CameraAccessor",
     "client.CameraMixin",
     "client.ClientPlayNetworkHandlerMixin",
+    "client.EntityRenderDispatcherShadowMixin",
     "client.InGameHudMixin",
     "client.KeyboardInputMixin",
     "client.LivingEntityRendererMixin",
     "client.MinecraftClientMixin",
-    "client.MouseMixin"
+    "client.MouseMixin",
+    "client.RenderTypeAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -2,6 +2,8 @@ package net.ochibo.twilightteleport.server;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+//? if <1.20.5
+/*import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;*/
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.ochibo.twilightteleport.network.TeleportEffectAction;
@@ -101,6 +103,7 @@ final class TeleportEffectBroadcaster {
 
         session.observers().add(recipient.getUUID());
 
+        //? if >=1.20.5 {
         ServerPlayNetworking.send(
                 recipient,
                 new TeleportEffectPayload(
@@ -112,5 +115,21 @@ final class TeleportEffectBroadcaster {
                         elapsedTicks
                 )
         );
+        //?} else {
+        /*var buf = PacketByteBufs.create();
+        new TeleportEffectPayload(
+                session.sessionId(),
+                session.playerUuid(),
+                action,
+                delayTicks,
+                durationTicks,
+                elapsedTicks
+        ).write(buf);
+        ServerPlayNetworking.send(
+                recipient,
+                TeleportEffectPayload.ID,
+                buf
+        );
+        *///?}
     }
 }

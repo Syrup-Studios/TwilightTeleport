@@ -4,11 +4,12 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
+import net.ochibo.twilightteleport.TwilightTeleport;
 import org.jetbrains.annotations.Nullable;
 
 public final class TeleportDissolveShaders {
     private static final ResourceLocation PROGRAM_ID =
-            ResourceLocation.fromNamespaceAndPath("twilightteleport", "teleport_dissolve");
+            TwilightTeleport.id("teleport_dissolve");
 
     @Nullable
     private static ShaderInstance program;
