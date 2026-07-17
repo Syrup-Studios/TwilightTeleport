@@ -1,11 +1,18 @@
 package net.ochibo.twilightteleport.client.render;
 
+//? if <1.20.5 {
+/*import com.mojang.blaze3d.systems.RenderSystem;
+*///?}
 import net.minecraft.util.Mth;
 import net.ochibo.twilightteleport.config.TwilightTeleportConfigManager;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+//? if <1.20.5 {
+/*import org.joml.Matrix3f;
+import org.joml.Vector3f;
+*///?}
 
 
 public final class TeleportShaderPackFallbackVertexConsumer
@@ -14,6 +21,12 @@ public final class TeleportShaderPackFallbackVertexConsumer
     private final VertexConsumer delegate;
     private final UUID playerUuid;
     private final int quadSubdivisions;
+
+    //? if <1.20.5 {
+    /*private final Matrix3f positionTransform;
+    private final Vector3f correctedSamplePosition =
+            new Vector3f();
+    *///?}
 
     private final List<VertexData> quadVertices =
             new ArrayList<>(4);
@@ -28,6 +41,13 @@ public final class TeleportShaderPackFallbackVertexConsumer
     ) {
         this.delegate = delegate;
         this.playerUuid = playerUuid;
+
+        //? if <1.20.5 {
+        /*this.positionTransform = new Matrix3f(
+                RenderSystem.getInverseViewRotationMatrix()
+        );
+        *///?}
+
         this.quadSubdivisions = Math.max(
                 1,
                 TwilightTeleportConfigManager
@@ -350,13 +370,7 @@ public final class TeleportShaderPackFallbackVertexConsumer
                         );
 
                 TeleportDissolveRenderState.FallbackSample sample =
-                        TeleportDissolveRenderState
-                                .sampleShaderPackFallback(
-                                        playerUuid,
-                                        center.x(),
-                                        center.y(),
-                                        center.z()
-                                );
+                        sample(center);
 
                 
                 if (sample.alpha() <= 0.001F) {
@@ -369,6 +383,31 @@ public final class TeleportShaderPackFallbackVertexConsumer
                 emit(cell01, sample);
             }
         }
+    }
+
+    private TeleportDissolveRenderState.FallbackSample sample(
+            VertexData position
+    ) {
+        float x = position.x();
+        float y = position.y();
+        float z = position.z();
+
+        //? if <1.20.5 {
+        /*correctedSamplePosition.set(x, y, z);
+        positionTransform.transform(correctedSamplePosition);
+
+        x = correctedSamplePosition.x();
+        y = correctedSamplePosition.y();
+        z = correctedSamplePosition.z();
+        *///?}
+
+        return TeleportDissolveRenderState
+                .sampleShaderPackFallback(
+                        playerUuid,
+                        x,
+                        y,
+                        z
+                );
     }
 
     private void emit(
