@@ -33,7 +33,7 @@ public final class PendingTeleportManager {
 
     
     private static final Map<UUID, Integer>
-            TELEPORT_TARGET_BYPASS_DEPTH =
+            TELEPORT_INTERCEPTION_BYPASS_DEPTH =
             new HashMap<>();
 
     private static final double MIN_EXTERNAL_TELEPORT_DISTANCE_SQUARED =
@@ -135,19 +135,31 @@ public final class PendingTeleportManager {
     public static void beginTeleportTargetTransition(
             ServerPlayer player
     ) {
-        TELEPORT_TARGET_BYPASS_DEPTH.merge(
+        beginTeleportInterceptionBypass(player);
+    }
+
+    public static void endTeleportTargetTransition(
+            ServerPlayer player
+    ) {
+        endTeleportInterceptionBypass(player);
+    }
+
+    public static void beginTeleportInterceptionBypass(
+            ServerPlayer player
+    ) {
+        TELEPORT_INTERCEPTION_BYPASS_DEPTH.merge(
                 player.getUUID(),
                 1,
                 Integer::sum
         );
     }
 
-    public static void endTeleportTargetTransition(
+    public static void endTeleportInterceptionBypass(
             ServerPlayer player
     ) {
         UUID playerUuid = player.getUUID();
 
-        TELEPORT_TARGET_BYPASS_DEPTH.computeIfPresent(
+        TELEPORT_INTERCEPTION_BYPASS_DEPTH.computeIfPresent(
                 playerUuid,
                 (uuid, depth) ->
                         depth <= 1
@@ -165,7 +177,7 @@ public final class PendingTeleportManager {
             return true;
         }
 
-        if (TELEPORT_TARGET_BYPASS_DEPTH
+        if (TELEPORT_INTERCEPTION_BYPASS_DEPTH
                 .getOrDefault(
                         playerUuid,
                         0
@@ -473,7 +485,7 @@ public final class PendingTeleportManager {
                 session.playerUuid()
         );
 
-        TELEPORT_TARGET_BYPASS_DEPTH.remove(
+        TELEPORT_INTERCEPTION_BYPASS_DEPTH.remove(
                 session.playerUuid()
         );
     }
