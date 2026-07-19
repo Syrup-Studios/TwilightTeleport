@@ -1319,8 +1319,10 @@ public final class TeleportCameraController {
     }
 
     private static void finish(Minecraft client) {
-        
-        client.options.setCameraType(CameraType.FIRST_PERSON);
+        if (previousCameraType != null) {
+            client.options.setCameraType(previousCameraType);
+        }
+
         clear();
     }
 
